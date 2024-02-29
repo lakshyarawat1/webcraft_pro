@@ -7,12 +7,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { pricingCards } from "@/lib/constants";
+import { currentUser } from "@clerk/nextjs";
 import clsx from "clsx";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+  const user = await currentUser();
+  if (user) {
+    redirect("/agency");
+  }
+
   return (
     <>
       <section className="h-full w-full md:pt-44 md:mt-0 -mt-44 relative flex items-center justify-center flex-col">

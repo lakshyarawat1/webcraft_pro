@@ -2,8 +2,8 @@ import { authMiddleware } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
  
 export default authMiddleware({
-  publicRoutes: ["/site", "/api/uploadthing"],
-  async beforeAuth(auth, req){},
+  publicRoutes: ['/site', '/api/uploadthing'],
+  async beforeAuth(auth, req) {},
   async afterAuth(auth, req) {
     //rewrite for domains
     const url = req.nextUrl
@@ -44,9 +44,8 @@ export default authMiddleware({
       return NextResponse.rewrite(new URL(`${pathWithSearchParams}`, req.url))
     }
   },
-});
- 
+})
+
 export const config = {
-  
-  matcher: ["/((?!.+\\.[\\w]+$|_next).*)", "/", "/(api|trpc)(.*)"],
-};
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+}
