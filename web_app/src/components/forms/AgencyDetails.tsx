@@ -4,7 +4,8 @@ import { Agency } from "@prisma/client";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { AlertDialog } from "@radix-ui/react-alert-dialog";
+import { v4 } from "uuid";
+
 import {
   Card,
   CardContent,
@@ -28,7 +29,26 @@ import FileUpload from "../global/FileUpload";
 import { Input } from "../ui/input";
 import { Switch } from "../ui/switch";
 import { Button } from "../ui/button";
-import { saveActivityLogsNotification } from "@/lib/queries";
+import {
+  deleteAgency,
+  initUser,
+  saveActivityLogsNotification,
+  updateAgencyDetails,
+  upsertAgency,
+} from "@/lib/queries";
+import { NumberInput } from "@tremor/react";
+import Loading from "../global/Loading";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 type Props = {
   data?: Partial<Agency>;
@@ -50,9 +70,8 @@ const FormSchema = z.object({
 });
 
 const AgencyDetails = ({ data }: Props) => {
-  const toast = useToast();
+  const { toast } = useToast();
   const router = useRouter();
-
   const [deletingAgency, setDeletingAgency] = useState(false);
 
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -80,7 +99,83 @@ const AgencyDetails = ({ data }: Props) => {
     }
   }, [data, form]);
 
-  const handleSubmit = () => {};
+  const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
+    try {
+      let newUserData;
+      let customerId;
+
+      if (!data?.id) {
+        const bodyData = {
+          email: values.companyEmail,
+          name: values.name,
+          shipping: {
+            address: {
+              city: values.city,
+              country: values.country,
+              line1: values.address,
+              postal_code: values.zip,
+              state: values.zip,
+            },
+            name: values.name,
+          },
+          address: {
+            city: values.city,
+            country: values.country,
+            line1: values.address,
+            postal_code: values.zip,
+            state: values.zip,
+          },
+        };
+      }
+
+      newUserData = await initUser({
+        role: "AGENCY_OWNER",
+      });
+
+      if (!data?.id) {
+        const response = await upsertAgency({
+          id: data?.id ? data.id : v4(),
+          address: values.address,
+          agencyLogo: values.agencyLogo,
+          city: values.city,
+          companyPhone: values.companyPhone,
+          country: values.country,
+          name: values.name,
+          state: values.state,
+          whiteLabel: values.whiteLabel,
+          zip: values.zip,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          companyEmail: values.companyEmail,
+          connectAccountId: "",
+          goal: 5,
+        });
+      }
+    } catch (error) {}
+  };
+
+  const handleDeleteAgency = async () => {
+    if (!data?.id) return;
+    setDeletingAgency(true);
+
+    try {
+      const response = await deleteAgency(data.id);
+      toast({
+        title: "Agency Deleted",
+        description: "Deleted the agency and all related sub accounts",
+      });
+      router.refresh();
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        title: "Oops! Something went wrong",
+        description: "Error deleting the agency and all related sub account",
+      });
+
+      console.log(err);
+      setDeletingAgency(false);
+    }
+  };
 
   return (
     <>
@@ -239,7 +334,7 @@ const AgencyDetails = ({ data }: Props) => {
                     name="zip"
                     render={({ field }) => (
                       <FormItem className="flex-1">
-                        <FormLabel>Zipcpde</FormLabel>
+                        <FormLabel>Zipcode</FormLabel>
                         <FormControl>
                           <Input placeholder="Zip" {...field} />
                         </FormControl>
@@ -262,12 +357,81 @@ const AgencyDetails = ({ data }: Props) => {
                     </FormItem>
                   )}
                 />
+                {data?.id && (
+                  <div className="flex flex-col gap-2">
+                    <FormLabel>Create a goal</FormLabel>
+                    <FormDescription>
+                      {" "}
+                      ✨ Create a goal for your agency. As your business grows
+                      your goals grow too so dont forget to set the bar higher!
+                    </FormDescription>
+                    <NumberInput
+                      defaultValue={data.goal}
+                      onValueChange={async (value: number) => {
+                        if (data?.id) {
+                          await updateAgencyDetails(data.id, {
+                            goal: value,
+                          });
+                          await saveActivityLogsNotification({
+                            agencyId: data.id,
+                            description: `Updated the agency goal to | #${value} Sub Account`,
+                            subAccountId: undefined,
+                          });
 
+                          router.refresh();
+                        }
+                      }}
+                      min={1}
+                      className="bg-background !border !border-input"
+                      placeholder="Sub Account Goal"
+                    ></NumberInput>
+                  </div>
+                )}
                 <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Loading" : "Save Agency Information"}
+                  {isLoading ? <Loading /> : "Save Agency Information"}
                 </Button>
               </form>
             </Form>
+            {data?.id && (
+              <>
+                <div className="flex flex-row items-center justify-between rounded-lg border border-destructive gap-4 p-4 mt-4">
+                  <div>Danger Zone</div>
+                  <div className="text-muted-foreground">
+                    Deleting your agency cannpt be undone. This will also delete
+                    all sub accounts and all data related to your sub accounts.
+                    Sub accounts will no longer have access to funnels, contacts
+                    etc.
+                  </div>
+                </div>
+                <AlertDialogTrigger
+                  disabled={isLoading || deletingAgency}
+                  className="text-red-600 p-2 text-center mt-2 rounded-md hover:bg-red-600 hover:text-white whitespace-nowrap"
+                >
+                  Deleting Agency
+                </AlertDialogTrigger>
+              </>
+            )}
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-left">
+                  Are you absolutely sure?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-left">
+                  This action cannot be undone. This will permanently delete the
+                  Agency account and all related sub accounts.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex items-center">
+                <AlertDialogCancel className="mb-2">Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  disabled={deletingAgency}
+                  className="bg-destructive hover:bg-destructive"
+                  onClick={handleDeleteAgency}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
           </CardContent>
         </Card>
       </AlertDialog>

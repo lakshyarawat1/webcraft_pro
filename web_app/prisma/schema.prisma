@@ -82,8 +82,7 @@ model Permission {
 
 model Agency {
   id               String                @id @default(uuid()) @map("_id") @db.ObjectId
-  currentAccountId String?               @default("")
-  customerId       String                @default("")
+  connectAccountId String?               @default("")
   name             String
   agencyLogo       String
   companyEmail     String
