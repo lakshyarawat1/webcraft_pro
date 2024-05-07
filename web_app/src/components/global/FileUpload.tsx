@@ -22,6 +22,8 @@ const FileUpload = ({ apiEndpoint, onChange, value }: Props) => {
               src={value}
               alt="uploaded Image"
               className="object-contain"
+              width="100"
+              height="100"
             ></Image>
           </div>
         ) : (

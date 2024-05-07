@@ -4,6 +4,7 @@ import { clerkClient, currentUser } from "@clerk/nextjs"
 import { db } from "./db";
 import { redirect } from "next/navigation";
 import { Agency, Plan, User } from "@prisma/client";
+import { generateRandomUUID } from "./utils";
 
 export const getAuthUserDetails = async () => {
     const user = await currentUser()
@@ -90,6 +91,7 @@ export const saveActivityLogsNotification = async ({
     if (subAccountId) {
         await db.notification.create({
             data: {
+                id: generateRandomUUID(),
                 notification: `${userData.name} | ${description}`,
                 User: {
                     connect: {
@@ -112,6 +114,7 @@ export const saveActivityLogsNotification = async ({
     else {
         await db.notification.create({
             data: {
+                id: generateRandomUUID(),
                 notification: `${userData.name} | ${description}`,
                 User: {
                     connect: {
@@ -232,59 +235,80 @@ export const initUser = async (newUser: Partial<User>) => {
     return userData;
 }
 
-export const upsertAgency = async (agency : Agency, price?:Plan) => {
-    if (!agency.companyEmail) return null;
-
-    try {
-        const agencyDetails = await db.agency.upsert({
-            where: {
-                id : agency.id
+export const upsertAgency = async (agency: Agency, price?: Plan) => {
+  if (!agency.companyEmail) return null
+  try {
+    const agencyDetails = await db.agency.upsert({
+      where: {
+        id: agency.id,
+      },
+        update: {
+            address: agency.address,
+            agencyLogo: agency.agencyLogo,
+            city: agency.city,
+            companyPhone: agency.companyPhone,
+            country: agency.country,
+            name: agency.name,
+            companyEmail: agency.companyEmail,
+            state: agency.state,
+            whiteLabel: agency.whiteLabel,
+            zip: agency.zip,
+            
+        },
+      create: {
+        users: {
+          connect: { email: agency.companyEmail },
+        },
+        ...agency,
+        SideBarOption: {
+          create: [
+             {
+                id : generateRandomUUID(),
+              name: 'Dashboard',
+              icon: 'category',
+              link: `/agency/${agency.id}`,
             },
-            update: agency,
-            create: {
-                users: {
-                    connect: {
-                        email : agency.companyEmail
-                    }
-                },
-                ...agency,
-                SideBarOption: {
-                    create: [
-                        {
-                        name: 'Dashboard',
-                        icon: 'category',
-                        link: `/agency/${agency.id}`,
-                        },
-                        {
-                        name: 'Launchpad',
-                        icon: 'clipboardIcon',
-                        link: `/agency/${agency.id}/launchpad`,
-                        },
-                        {
-                        name: 'Billing',
-                        icon: 'payment',
-                        link: `/agency/${agency.id}/billing`,
-                        },
-                        {
-                        name: 'Settings',
-                        icon: 'settings',
-                        link: `/agency/${agency.id}/settings`,
-                        },
-                        {
-                        name: 'Sub Accounts',
-                        icon: 'person',
-                        link: `/agency/${agency.id}/all-subaccounts`,
-                        },
-                        {
-                        name: 'Team',
-                        icon: 'shield',
-                        link: `/agency/${agency.id}/team`,
-                        },
-                    ],
-                },
-            }
-        })
-    } catch (error) {
-        
-    }
+                {
+                id : generateRandomUUID(),
+                
+              name: 'Launchpad',
+              icon: 'clipboardIcon',
+              link: `/agency/${agency.id}/launchpad`,
+            },
+                {
+                id : generateRandomUUID(),
+                
+              name: 'Billing',
+              icon: 'payment',
+              link: `/agency/${agency.id}/billing`,
+            },
+                {
+                id : generateRandomUUID(),
+                
+              name: 'Settings',
+              icon: 'settings',
+              link: `/agency/${agency.id}/settings`,
+            },
+                {
+                id : generateRandomUUID(),
+                
+              name: 'Sub Accounts',
+              icon: 'person',
+              link: `/agency/${agency.id}/all-subaccounts`,
+            },
+                {
+                id : generateRandomUUID(),
+                
+              name: 'Team',
+              icon: 'shield',
+              link: `/agency/${agency.id}/team`,
+            },
+          ],
+        },
+      },
+    })
+    return agencyDetails
+  } catch (error) {
+    console.log(error)
+  }
 }

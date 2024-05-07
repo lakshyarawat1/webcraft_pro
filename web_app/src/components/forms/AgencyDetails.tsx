@@ -49,6 +49,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { generateRandomUUID } from "@/lib/utils";
 
 type Props = {
   data?: Partial<Agency>;
@@ -133,8 +134,8 @@ const AgencyDetails = ({ data }: Props) => {
       });
 
       if (!data?.id) {
-        const response = await upsertAgency({
-          id: data?.id ? data.id : v4(),
+        await upsertAgency({
+          id: data?.id ? data.id : generateRandomUUID(),
           address: values.address,
           agencyLogo: values.agencyLogo,
           city: values.city,
@@ -150,8 +151,18 @@ const AgencyDetails = ({ data }: Props) => {
           connectAccountId: "",
           goal: 5,
         });
+        toast({
+          title: "Created agency",
+        });
       }
-    } catch (error) {}
+      return router.refresh();
+    } catch (error) {
+      toast({
+        title: "Oops ! Something went wrong",
+        description: error as string,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeleteAgency = async () => {
