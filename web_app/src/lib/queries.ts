@@ -3,8 +3,9 @@
 import { clerkClient, currentUser } from "@clerk/nextjs"
 import { db } from "./db";
 import { redirect } from "next/navigation";
-import { Agency, Plan, User } from "@prisma/client";
+import { Agency, Plan, SubAccount, User } from "@prisma/client";
 import { generateRandomUUID } from "./utils";
+import { v4 } from "uuid";
 
 export const getAuthUserDetails = async () => {
     const user = await currentUser()
@@ -326,4 +327,91 @@ export const getNotificationAndUser = async (agencyId: string) => {
     } catch (err) {
         console.log(err)
     }
+}
+
+export const upsertSubAccount = async (subAccount: SubAccount) => {
+    if (!subAccount.companyEmail) return null;
+
+    const agencyOwner = await db.user.findFirst({ where: { agency: { id: subAccount.agencyId }, role: 'AGENCY_OWNER' } })
+    
+    if (!agencyOwner) return console.log('Error could not create subAccount')
+    
+    const permissionId = v4()
+
+    const res = await db.subAccount.upsert({
+        where: {
+            id : subAccount.id
+        },
+        update: subAccount,
+        create: {
+            ...subAccount,
+            Permissions: {
+                create: {
+                    access: true,
+                    email: agencyOwner.email,
+                    id : permissionId
+                },
+                connect: {
+                    subAccountId: subAccount.id,
+                    id: permissionId
+                }
+            },
+            Pipeline: {
+                create: { name: 'Lead Cycle' , id : v4()},
+            },
+            SidebarOption: {
+                create: [
+                {
+                    name: 'Launchpad',
+                    icon: 'clipboardIcon',
+                    link: `/subaccount/${subAccount.id}/launchpad`,
+                    id: v4()
+                },
+                {
+                    name: 'Settings',
+                    icon: 'settings',
+                    link: `/subaccount/${subAccount.id}/settings`,
+                    id: v4()
+                },
+                {
+                    name: 'Funnels',
+                    icon: 'pipelines',
+                    link: `/subaccount/${subAccount.id}/funnels`,
+                    id: v4()
+                },
+                {
+                    name: 'Media',
+                    icon: 'database',
+                    link: `/subaccount/${subAccount.id}/media`,
+                    id: v4()
+                },
+                {
+                    name: 'Automations',
+                    icon: 'chip',
+                    link: `/subaccount/${subAccount.id}/automations`,
+                    id: v4()
+                },
+                {
+                    name: 'Pipelines',
+                    icon: 'flag',
+                    link: `/subaccount/${subAccount.id}/pipelines`,
+                    id: v4()
+                },
+                {
+                    name: 'Contacts',
+                    icon: 'person',
+                    link: `/subaccount/${subAccount.id}/contacts`,
+                    id: v4()
+                },
+                {
+                    name: 'Dashboard',
+                    icon: 'category',
+                    link: `/subaccount/${subAccount.id}`,
+                    id: v4()
+                },
+                ],
+            },
+        }
+    })
+    return res;
 }
