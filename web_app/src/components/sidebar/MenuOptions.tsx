@@ -168,21 +168,21 @@ const MenuOptions = ({
                           <CommandItem key={subaccount.id}>
                             {defaultOpen ? (
                               <Link
-                                href={`agency/${user.agency.id}`}
+                                href={`subaccount/${user.agency.id}`}
                                 className="flex gap-4 w-full h-full"
                               >
                                 <div className="relative w-16">
                                   <Image
-                                    src={user.agency.agencyLogo}
-                                    alt="Agency Logo"
+                                    src={user.subAccount.subAccountLogo}
+                                    alt="Subaccount Logo"
                                     fill
                                     className="rounded-md object-contain"
                                   />
                                 </div>
                                 <div className="flex flex-col flex-1">
-                                  {user?.agency?.name}
+                                  {user?.subAccount?.name}
                                   <span className="text-muted-foreground">
-                                    {user?.agency?.address}
+                                    {user?.subAccount?.address}
                                   </span>
                                 </div>
                               </Link>
