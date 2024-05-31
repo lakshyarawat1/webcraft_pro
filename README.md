@@ -1,6 +1,6 @@
 # Webcraft-Pro
 
-Welcome to Webcraft-Pro, a comprehensive SaaS website builder, project management tool, and dashboard platform built using modern technologies like Next.js 14, Bun, Stripe Connect, Prisma, MySQL, and Tailwind CSS. This powerful application provides users with an all-in-one solution for creating, managing, and monetizing their web projects efficiently.
+Welcome to Webcraft-Pro, a comprehensive SaaS website builder, project management tool, and dashboard platform built using modern technologies like Next.js 14, Pnpm, Stripe Connect, Prisma, MySQL, and Tailwind CSS. This powerful application provides users with an all-in-one solution for creating, managing, and monetizing their web projects efficiently.
 
 ## Table of Contents
 
@@ -30,7 +30,7 @@ Welcome to Webcraft-Pro, a comprehensive SaaS website builder, project managemen
 ## Tech Stack
 
 - **Frontend**: Next.js 14, Tailwind CSS
-- **Backend**: Bun
+- **Backend**: Pnpm
 - **Database**: MySQL, Prisma
 - **Payments**: Stripe Connect
 
@@ -41,25 +41,28 @@ Welcome to Webcraft-Pro, a comprehensive SaaS website builder, project managemen
 Before you begin, ensure you have met the following requirements:
 
 - Node.js (v16 or higher)
-- Bun (v0.2.2 or higher)
+- Pnpm (v9.0 or higher)
 - MySQL (v8 or higher)
 - Stripe account
 
 ### Installation
 
 1. **Clone the Repository**
+
    ```sh
    git clone https://github.com/yourusername/webcraft-pro.git
    cd webcraft-pro
    ```
 
 2. **Install Dependencies**
+
    ```sh
-   bun install
+   pnpm install
    ```
 
 3. **Set Up Environment Variables**
    Create a `.env` file in the root directory and add the following:
+
    ```env
    DATABASE_URL="mysql://user:password@localhost:3306/webcraft_pro"
    STRIPE_SECRET_KEY="your_stripe_secret_key"
@@ -75,8 +78,9 @@ Before you begin, ensure you have met the following requirements:
 ### Running the Project
 
 1. **Start the Development Server**
+
    ```sh
-   bun dev
+   pnpm run dev
    ```
 
 2. Open your browser and navigate to `http://localhost:3000`.
