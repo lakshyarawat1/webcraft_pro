@@ -18,28 +18,34 @@ const Page = async ({
 
   const user = await getAuthUserDetails();
 
+  console.log(user, agencyId, searchParams);
+
   if (agencyId) {
-    if (user?.role === "SUBACCOUNT_GUEST" || user?.role === "SUBACCOUNT_USER") {
-      return redirect("/subaccount");
-    } else if (user?.role == "AGENCY_OWNER" || user?.role === "AGENCY_ADMIN") {
-      if (searchParams.plan) {
-        return redirect(
-          `/agency/${agencyId}/billing?plan=${searchParams.plan}`
-        );
-      }
-      if (searchParams.state) {
-        const statePath = searchParams.state.split("___")[0];
-        const stateAgencyId = searchParams.state.split("___")[1];
+    // console.log('inside blovk 1')
+    // if (user?.role === "SUBACCOUNT_GUEST" || user?.role === "SUBACCOUNT_USER") {
+    //   console.log('inside blovk 2')
+    //   return redirect("/subaccount");
+    // } else if (user?.role == "AGENCY_OWNER" || user?.role === "AGENCY_ADMIN") {
+    //   if (searchParams.plan) {
+    //     return redirect(
+    //       `/agency/${agencyId}/billing?plan=${searchParams.plan}`
+    //     );
+    //   }
+    //   if (searchParams.state) {
+    //     const statePath = searchParams.state.split("___")[0];
+    //     const stateAgencyId = searchParams.state.split("___")[1];
 
-        if (!stateAgencyId) {
-          return <div>Not Authorized</div>;
-        }
+    //     if (!stateAgencyId) {
+    //       return <div>Not Authorized</div>;
+    //     }
 
-        return redirect(
-          `/agency/${stateAgencyId}/${statePath}?code=${searchParams.code}`
-        );
-      }
-    } else return redirect(`/agency/${agencyId}`);
+    //     return redirect(
+    //       `/agency/${stateAgencyId}/${statePath}?code=${searchParams.code}`
+    //     );
+    //   }
+    // } else return redirect(`/agency/${agencyId}`);
+
+    return redirect(`/agency/${agencyId}`);
   }
 
   const authUser = await currentUser();
@@ -61,3 +67,5 @@ const Page = async ({
 };
 
 export default Page;
+
+

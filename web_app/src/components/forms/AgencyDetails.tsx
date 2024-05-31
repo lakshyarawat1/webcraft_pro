@@ -133,27 +133,30 @@ const AgencyDetails = ({ data }: Props) => {
         role: "AGENCY_OWNER",
       });
 
-      if (!data?.id) {
-        await upsertAgency({
-          id: data?.id ? data.id : generateRandomUUID(),
-          address: values.address,
-          agencyLogo: values.agencyLogo,
-          city: values.city,
-          companyPhone: values.companyPhone,
-          country: values.country,
-          name: values.name,
-          state: values.state,
-          whiteLabel: values.whiteLabel,
-          zip: values.zip,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          companyEmail: values.companyEmail,
-          connectAccountId: "",
-          goal: 5,
-        });
-        toast({
-          title: "Created agency",
-        });
+      const res = await upsertAgency({
+        id: data?.id ? data.id : generateRandomUUID(),
+        address: values.address,
+        agencyLogo: values.agencyLogo,
+        city: values.city,
+        companyPhone: values.companyPhone,
+        country: values.country,
+        name: values.name,
+        state: values.state,
+        whiteLabel: values.whiteLabel,
+        zip: values.zip,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        companyEmail: values.companyEmail,
+        connectAccountId: "",
+        goal: 5,
+      });
+      toast({
+        title: "Created agency",
+      });
+
+      if (data?.id) return router.refresh();
+      if (res) {
+        return router.refresh();
       }
       return router.refresh();
     } catch (error) {

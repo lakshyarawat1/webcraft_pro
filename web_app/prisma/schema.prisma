@@ -353,10 +353,10 @@ model SubAccountSidebarOption {
   name         String      @default("Menu")
   link         String      @default("#")
   icon         Icon        @default(info)
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
   SubAccount   SubAccount? @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   subAccountId String?     @db.ObjectId
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   @@index([subAccountId])
 }
