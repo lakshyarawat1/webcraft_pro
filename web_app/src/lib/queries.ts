@@ -5,7 +5,6 @@ import { db } from "./db";
 import { redirect } from "next/navigation";
 import { Agency, Plan, SubAccount, User } from "@prisma/client";
 import { generateRandomUUID } from "./utils";
-import { v4 } from "uuid";
 
 export const getAuthUserDetails = async () => {
     const user = await currentUser()
@@ -336,7 +335,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
     
     if (!agencyOwner) return console.log('Error could not create subAccount')
     
-    const permissionId = v4()
+    const permissionId = generateRandomUUID()
 
     const res = await db.subAccount.upsert({
         where: {
@@ -357,7 +356,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
                 }
             },
             Pipeline: {
-                create: { name: 'Lead Cycle' , id : v4()},
+                create: { name: 'Lead Cycle' , id : generateRandomUUID()},
             },
             SidebarOption: {
                 create: [
@@ -365,53 +364,111 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
                     name: 'Launchpad',
                     icon: 'clipboardIcon',
                     link: `/subaccount/${subAccount.id}/launchpad`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 {
                     name: 'Settings',
                     icon: 'settings',
                     link: `/subaccount/${subAccount.id}/settings`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 {
                     name: 'Funnels',
                     icon: 'pipelines',
                     link: `/subaccount/${subAccount.id}/funnels`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 {
                     name: 'Media',
                     icon: 'database',
                     link: `/subaccount/${subAccount.id}/media`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 {
                     name: 'Automations',
                     icon: 'chip',
                     link: `/subaccount/${subAccount.id}/automations`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 {
                     name: 'Pipelines',
                     icon: 'flag',
                     link: `/subaccount/${subAccount.id}/pipelines`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 {
                     name: 'Contacts',
                     icon: 'person',
                     link: `/subaccount/${subAccount.id}/contacts`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 {
                     name: 'Dashboard',
                     icon: 'category',
                     link: `/subaccount/${subAccount.id}`,
-                    id: v4()
+                    id: generateRandomUUID()
                 },
                 ],
             },
         }
     })
     return res;
+}
+
+export const getUserPermissions = async (userId: string) => {
+    const res = await db.user.findUnique({
+        where: {
+            id : userId
+        },
+        select: {
+            Permissions: {
+                include: {
+                    subAccount: true
+                }
+            }
+        }
+    })
+
+    return res;
+}
+
+export const updateUser = async (user: Partial<User>) => {
+    const response = await db.user.update({
+        where: {
+            email : user.email
+        },
+        data: {
+            ...user
+        }
+    })
+
+    await clerkClient.users.updateUserMetadata(response.id, {
+        privateMetadata: {
+            role : user.role || 'SUBACCOUNT_USER'
+        }
+    })
+
+    return response;
+}
+
+export const changeUserPermissions = async (permissionId: string | undefined, userEmail : string, subAccountId : string, permissions: boolean) => {
+    try {
+        const res = await db.permission.upsert({
+            where: {
+                id : permissionId
+            },
+            update: {
+                access : permissions
+            },
+            create: {
+                id: generateRandomUUID(),
+                access: permissions,
+                email: userEmail,
+                subAccountId : subAccountId,
+            }
+        })
+        return res;
+    } catch (err) {
+        console.log('Error', err)
+    }
 }
