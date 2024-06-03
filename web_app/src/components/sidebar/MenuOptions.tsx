@@ -180,28 +180,28 @@ const MenuOptions = ({
                               >
                                 <div className="relative w-16">
                                   <Image
-                                    src={user.subAccount.subAccountLogo}
+                                    src={user.agency.subAccount.subAccountLogo}
                                     alt="Subaccount Logo"
                                     fill
                                     className="rounded-md object-contain"
                                   />
                                 </div>
                                 <div className="flex flex-col flex-1">
-                                  {user?.subAccount?.name}
+                                  {user?.agency.subAccount?.name}
                                   <span className="text-muted-foreground">
-                                    {user?.subAccount?.address}
+                                    {user?.agency.subAccount?.address}
                                   </span>
                                 </div>
                               </Link>
                             ) : (
                               <SheetClose asChild>
                                 <Link
-                                  href={`subaccount/${user.subAccount.id}`}
+                                  href={`subaccount/${user.agency.subAccount.id}`}
                                   className="flex gap-4 w-full h-full"
                                 >
                                   <div className="relative w-16">
                                     <Image
-                                      src={user.subAccount.subAccountLogo}
+                                      src={user.agency.subAccount.subAccountLogo}
                                       alt="subAccount Logo"
                                       fill
                                       className="rounded-md object-contain"

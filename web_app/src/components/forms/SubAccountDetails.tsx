@@ -32,6 +32,7 @@ import { saveActivityLogsNotification, upsertSubAccount } from "@/lib/queries";
 import { useEffect } from "react";
 import Loading from "../global/Loading";
 import { useModal } from "@/providers/model-provider";
+import { generateRandomUUID } from "@/lib/utils";
 
 const formSchema = z.object({
   name: z.string(),
@@ -84,7 +85,7 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       const response = await upsertSubAccount({
-        id: details?.id ? details.id : v4(),
+        id: details?.id ? details.id : generateRandomUUID(),
         address: values.address,
         subAccountLogo: values.subAccountLogo,
         city: values.city,

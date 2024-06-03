@@ -341,7 +341,19 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
         where: {
             id : subAccount.id
         },
-        update: subAccount,
+        update: {
+            name: subAccount.name,
+            subAccountLogo: subAccount.subAccountLogo,
+            companyEmail: subAccount.companyEmail,
+            companyPhone: subAccount.companyPhone,
+            goal: subAccount.goal,
+            address: subAccount.address,
+            city: subAccount.city,
+            zipCode: subAccount.zipCode,
+            state: subAccount.state,
+            country: subAccount.country,
+            agencyId: subAccount.agencyId,
+        },
         create: {
             ...subAccount,
             Permissions: {
@@ -471,4 +483,24 @@ export const changeUserPermissions = async (permissionId: string | undefined, us
     } catch (err) {
         console.log('Error', err)
     }
+}
+
+export const getSubAccountDetails = async (subAccountId : string) => {
+    const res = await db.subAccount.findUnique({
+        where: {
+            id : subAccountId
+        }
+    })
+
+    return res;
+}
+
+export const deleteSubAccount = async (subAccountId: string) => {
+    const res = await db.subAccount.delete({
+        where: {
+            id: subAccountId
+        }
+    })
+
+    return res;
 }

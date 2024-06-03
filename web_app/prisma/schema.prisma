@@ -383,7 +383,7 @@ model Notification {
   notification String
   agencyId     String  @db.ObjectId
   subAccountId String? @db.ObjectId
-  userId       String  @db.ObjectId
+  userId       String
 
   User       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   Agency     Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
