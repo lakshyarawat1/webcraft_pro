@@ -60,10 +60,12 @@ model User {
   updatedAt     DateTime       @updatedAt
   role          Role           @default(SUBACCOUNT_USER)
   agencyId      String?        @db.ObjectId
+  subAccountId  String?        @db.ObjectId
   agency        Agency?        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   Permissions   Permission[]
   Tickets       Ticket[]
   Notifications Notification[]
+  subAccount    SubAccount?    @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
 
   @@index([agencyId])
 }
@@ -133,6 +135,7 @@ model SubAccount {
   Pipeline         Pipeline[]
   Tags             Tag[]
   Notification     Notification[]
+  User             User[]
 
   @@index([agencyId])
 }
