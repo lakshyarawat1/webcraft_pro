@@ -150,7 +150,7 @@ export const verifyAndAcceptInvitation = async () => {
             email: invitationExists.email,
             agencyId: invitationExists.agencyId,
             avatarUrl: user.imageUrl,
-            subAccountId : '',
+            subAccountId : generateRandomUUID(),
             id: user.id,
             name: `${user.firstName} ${user.lastName}`,
             role: invitationExists.role,

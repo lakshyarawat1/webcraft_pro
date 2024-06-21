@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { pricingCards } from "@/lib/constants";
+import { getAuthUserDetails } from "@/lib/queries";
 import { currentUser } from "@clerk/nextjs";
 import clsx from "clsx";
 import { Check } from "lucide-react";
@@ -16,8 +17,21 @@ import { redirect } from "next/navigation";
 
 export default async function Home() {
   const user = await currentUser();
-  if (user) {
+
+  const userDetails = await getAuthUserDetails();
+
+  if (
+    userDetails?.role === "AGENCY_OWNER" ||
+    userDetails?.role === "AGENCY_ADMIN"
+  ) {
     redirect("/agency");
+  }
+
+  if (
+    userDetails?.role === "SUBACCOUNT_GUEST" ||
+    userDetails?.role === "SUBACCOUNT_USER"
+  ) {
+    redirect(`/subaccount/${userDetails.subAccountId}`);
   }
 
   return (
