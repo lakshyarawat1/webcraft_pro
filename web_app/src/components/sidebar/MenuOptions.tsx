@@ -62,6 +62,7 @@ const MenuOptions = ({
 
   if (!isMounted) return;
 
+
   return (
     <Sheet modal={false} {...openState}>
       <SheetTrigger
@@ -125,7 +126,7 @@ const MenuOptions = ({
                         <CommandItem className="!bg-transparent my-2 text-primary border-[1px] border-border p-2 rounded-md hover:!bg-muted cursor-pointer transition-all">
                           {defaultOpen ? (
                             <Link
-                              href={`agency/${user.agency.id}`}
+                              href={`/agency/${user.agency.id}`}
                               className="flex gap-4 w-full h-full"
                             >
                               <div className="relative w-16">
@@ -146,7 +147,7 @@ const MenuOptions = ({
                           ) : (
                             <SheetClose asChild>
                               <Link
-                                href={`agency/${user.agency.agencyId}`}
+                                href={`/agency/${user.agency.agencyId}`}
                                 className="flex gap-4 w-full h-full"
                               >
                                 <div className="relative w-16">
@@ -172,27 +173,28 @@ const MenuOptions = ({
                   <CommandGroup heading="Accounts">
                     {!!subAccounts
                       ? subAccounts.map((subaccount) => (
-                          <CommandItem key={subaccount.id}>
+                          <CommandItem key={subaccount.id} >
                             {defaultOpen ? (
                               <Link
-                                href={`subaccount/${user.agency.id}`}
+                                href={`/subaccount/${subaccount.id}`}
                                 className="flex gap-4 w-full h-full"
                               >
                                 <div className="relative w-16">
                                   <Image
-                                    src={user.agency.subAccount.subAccountLogo}
+                                    src={subaccount.subAccountLogo}
                                     alt="Subaccount Logo"
                                     fill
                                     className="rounded-md object-contain"
                                   />
                                 </div>
                                 <div className="flex flex-col flex-1">
-                                  {user?.agency.subAccount?.name}
+                                  {subaccount.name}
                                   <span className="text-muted-foreground">
-                                    {user?.agency.subAccount?.address}
+                                    {subaccount.address}
                                   </span>
                                 </div>
-                              </Link>
+                            </Link>
+                            
                             ) : (
                               <SheetClose asChild>
                                 <Link
@@ -217,7 +219,8 @@ const MenuOptions = ({
                               </SheetClose>
                             )}
                           </CommandItem>
-                        ))
+                        )
+                      )
                       : "No Accounts Found"}
                   </CommandGroup>
                 </CommandList>

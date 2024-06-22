@@ -31,7 +31,7 @@ export default async function Home() {
     userDetails?.role === "SUBACCOUNT_GUEST" ||
     userDetails?.role === "SUBACCOUNT_USER"
   ) {
-    redirect(`/subaccount/${userDetails.subAccountId}`);
+    redirect(`/subaccount`);
   }
 
   return (
