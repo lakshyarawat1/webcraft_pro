@@ -195,7 +195,7 @@ model Ticket {
   customerId String?  @db.ObjectId
   Customer   Contact? @relation(fields: [customerId], references: [id], onDelete: SetNull)
 
-  assignedUserId String? @db.ObjectId
+  assignedUserId String? 
   Assigned       User?   @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
   Agency         Agency? @relation(fields: [agencyId], references: [id])
   agencyId       String? @db.ObjectId

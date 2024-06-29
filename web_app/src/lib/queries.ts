@@ -3,9 +3,10 @@
 import { clerkClient, currentUser } from "@clerk/nextjs"
 import { db } from "./db";
 import { redirect } from "next/navigation";
-import { Agency, Plan, Role, SubAccount, User } from "@prisma/client";
+import { Agency, Lane, Plan, Prisma, Role, SubAccount, Tag, Ticket, User } from "@prisma/client";
 import { generateRandomUUID } from "./utils";
-import { CreateMediaType } from "./types";
+import { CreateFunnelFormSchema, CreateMediaType } from "./types";
+import { z } from "zod";
 
 export const getAuthUserDetails = async () => {
     const user = await currentUser()
@@ -528,6 +529,22 @@ export const getUser = async (id: string) => {
   return user
 }
 
+export const getUserByEmailId = async (email: string) => {
+    const user = await db.user.findUnique({
+        where: {
+            email: email,
+        }
+    })
+    return user;
+};
+
+export const getUserByClerkId = async (id: string) => {
+
+    const user = await clerkClient.users.getUser(id);
+    const userData = await getUserByEmailId(user.emailAddresses[0].emailAddress)
+    return userData;
+}
+
 export const sendInvitation = async (
   role: Role,
   email: string,
@@ -536,7 +553,7 @@ export const sendInvitation = async (
   const resposne = await db.invitation.create({
     data: { id : generateRandomUUID(), email, agencyId, role },
   })
-
+  
   try {
     const invitation = await clerkClient.invitations.createInvitation({
       emailAddress: email,
@@ -551,7 +568,7 @@ export const sendInvitation = async (
     throw error
   }
 
-  return resposne
+    return resposne;
 }
 
 export const getMedia = async (subAccountId : string) => {
@@ -584,6 +601,321 @@ export const deleteMedia = async (mediaId: string) => {
     const res = await db.media.delete({
         where: {
             id: mediaId
+        }
+    })
+    return res;
+}
+
+export const getPipeLineDetails = async (pipelineId: string) => {
+    const res = await db.pipeline.findUnique({
+        where: {
+            id : pipelineId
+        }
+    })
+
+    return res;
+}
+
+export const getLanesWithTicketAndTags = async (pipelineId: string) => {
+    const res = await db.lane.findMany({
+        where: {
+            pipelineId
+        },
+        orderBy: {
+            order : 'asc'
+        },
+        include: {
+            Tickets: {
+                orderBy: {
+                    order : 'asc'
+                },
+                include: {
+                    Tags: true,
+                    Assigned: true,
+                    Customer : true
+                }
+            },
+            
+        }
+    })
+    return res;
+}
+
+export const upsertFunnel = async (
+    subAccountId: string,
+    funnel: z.infer<typeof CreateFunnelFormSchema> & {
+        liveProducts: string
+    },
+    funnelId: string
+) => {
+    const res = await db.funnel.upsert({
+        where: { id: funnelId },
+        update: funnel,
+        create: {
+            ...funnel,
+            id: funnelId || generateRandomUUID(),
+            subAccountId: subAccountId
+        }
+    })
+
+    return res;
+}
+
+export const upsertPipeline = async (pipeline: Prisma.PipelineUncheckedCreateWithoutLaneInput) => {
+    const res = await db.pipeline.upsert({
+        where: {
+            id: pipeline.id || generateRandomUUID()
+        },
+        update: {
+            name: pipeline.name,
+            subAccountId: pipeline.subAccountId,
+            
+        },
+        create: pipeline,
+    })
+
+    return res;
+}
+
+export const deletePipeline = async (pipelineId: string) => {
+    const res = await db.pipeline.delete({
+        where : {
+            id: pipelineId
+        }
+    })
+    return res;
+}
+
+export const updateLanesOrder = async (lanes: Lane[]) => {
+    try {
+        const updatedLanes = lanes.map((lane) => {
+            return db.lane.update({
+                where: {
+                    id: lane.id
+                },
+                data: {
+                    order: lane.order
+                }
+            })
+        })
+        await db.$transaction(updatedLanes)
+        console.log('Done reordering')
+    } catch (err) {
+        console.log(err, 'ERROR UPDATE LANES ORDER')
+    }
+}
+
+export const updateTicketOrder = async (tickets : Ticket[]) => {
+    try {
+        const updateTerms = tickets.map((ticket) => {
+            return db.ticket.update({
+                where: { id: ticket.id },
+                data: {
+                    order: ticket.order,
+                    laneId: ticket.laneId
+                }
+            })
+        })
+
+        await db.$transaction(updateTerms);
+        console.log('Done reordering')
+    } catch (err) {
+        console.log(err, 'COULD NOT UPDATE ORDER')
+    }
+}
+
+export const upsertLane = async (lane : Prisma.LaneUncheckedCreateInput) => {
+    let order: number = 0;
+
+    if (!lane.order) {
+        const lanes = await db.lane.findMany({
+            where: {
+                pipelineId: lane.pipelineId
+            }
+        });
+
+        order = lanes.length;
+    }
+    else {
+        order = lane.order;
+    }
+
+    const res = await db.lane.upsert({
+        where: {
+            id : lane.id || generateRandomUUID()
+        },
+        update: {
+            name: lane.name,
+            pipelineId: lane.pipelineId,
+            
+        },
+        create: {
+            ...lane,
+            order
+        }
+    });
+}
+
+export const deleteLane = async (laneId: string) => {
+    const res = await db.lane.delete({
+        where: {
+            id : laneId
+        }
+    })
+    return res;
+}
+
+export const getTicketsWithTags = async(pipelineId: string) => {
+    const res = await db.ticket.findMany({
+        where: {
+            Lane: {
+                pipelineId
+            }
+        },
+        include: {
+            Tags: true,
+            Assigned: true,
+            Customer :true,
+        }
+    })
+    return res;
+}
+
+export const _getTicketsWithAllRelations = async (laneId: string) => {
+    const res = await db.ticket.findMany({
+        where: {
+            laneId: laneId
+        },
+        include: {
+            Assigned: true,
+            Customer: true,
+            Lane: true, 
+            Tags: true
+        }
+    })
+    return res;
+}
+
+export const getSubAccountTeamMembers = async (subAccountId: string) => {
+    const subAccountUserWithAccess = await db.user.findMany({
+        where: {
+            agency: {
+                subAccount: {
+                    some: {
+                        id: subAccountId
+                    }
+                }
+            },
+            role: 'SUBACCOUNT_USER',
+            Permissions: {
+                some: {
+                    subAccountId: subAccountId,
+                    access : true
+                }
+            }
+        }
+    })
+
+    return subAccountUserWithAccess
+}
+
+export const searchContacts = async (searchTerms : string) => {
+    const res = await db.contact.findMany({
+        where: {
+            name: {
+                contains : searchTerms
+            }
+        }
+    })
+
+    return res;
+}
+
+export const upsertTicket = async (ticket : Prisma.TicketUncheckedCreateInput, tags: Tag[]) => {
+    let order: number = 0;
+    if (!ticket.order) {
+        const tickets = await db.ticket.findMany({
+            where: {
+                laneId: ticket.laneId
+            },
+            
+        })
+        order = tickets.length
+    }
+    else {
+        order = ticket.order
+    }
+    const res = await db.ticket.upsert({
+        where: {
+            id :ticket.id || generateRandomUUID(),
+        },
+        update: {
+            name: ticket.name,
+            description: ticket.description,
+            value: ticket.value,
+            laneId: ticket.laneId,
+            assignedUserId : ticket.assignedUserId,
+            Tags: { connect: tags.map(tag => ({ id: tag.id })) }
+        },
+        create: {
+            ...ticket,
+                id: generateRandomUUID(),
+            Tags: { connect: tags.map(tag => ({ id: tag.id })) }, order
+        },
+        include: {
+            Assigned: true,
+            Customer: true,
+            Tags: true,
+            Lane : true,
+        }
+    })
+
+    return res;
+}
+
+export const deleteTicket = async (ticketId : string) => {
+    const res = await db.ticket.delete({
+        where: {
+            id : ticketId
+        }
+    })
+    return res;
+}
+
+export const upsertTag = async (subAccountId: string, tag: Prisma.TagUncheckedCreateInput) => {
+    const res = await db.tag.upsert({
+        where: {
+            id : tag.id || generateRandomUUID(), subAccountId :subAccountId
+        },
+        update: {
+            color: tag.color,
+            name: tag.name,
+            subAccountId: subAccountId
+            
+        },
+        create: {
+            ...tag,
+            subAccountId : subAccountId,
+        }
+    })
+}
+
+export const deleteTag = async (tagId: string) => {
+    const res = await db.tag.delete({
+        where: {
+            id : tagId
+        }
+    })
+    return res;
+}
+
+export const getTagsForSubAccount = async (subAccountId: string) => {
+    const res = await db.subAccount.findUnique({
+        where: {
+            id : subAccountId
+        },
+        select: {
+            Tags : true,
         }
     })
     return res;
