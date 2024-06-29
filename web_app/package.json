@@ -37,6 +37,7 @@
     "clsx": "^2.1.0",
     "cmdk": "^1.0.0",
     "crypto": "^1.0.1",
+    "date-fns": "^3.6.0",
     "dotenv-cli": "^7.3.0",
     "dotenv-vault": "^1.26.0",
     "lucide-react": "^0.336.0",

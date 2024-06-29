@@ -1,7 +1,7 @@
 "use client";
 
 import { TicketDetails } from "@/lib/types";
-import { Agency, User } from "@prisma/client";
+import { Agency, Contact, User } from "@prisma/client";
 import React, { FC, useContext, useEffect, useState } from "react";
 import { createContext } from "react";
 
@@ -14,6 +14,7 @@ export type ModalData = {
   user?: User;
   agency?: Agency;
   ticket?: TicketDetails[0]
+  contact?: Contact
 };
 
 type ModalContextType = {

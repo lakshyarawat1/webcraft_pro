@@ -920,3 +920,19 @@ export const getTagsForSubAccount = async (subAccountId: string) => {
     })
     return res;
 }
+
+export const upsertContact = async (contact : Prisma.ContactUncheckedCreateInput) => {
+    const res = await db.contact.upsert({
+        where: {
+            id : contact.id || generateRandomUUID()
+        },
+        update: {
+            email: contact.email,
+            name: contact.name,
+            subAccountId: contact.subAccountId
+        
+        },
+        create : contact,
+    })
+    return res;
+}   

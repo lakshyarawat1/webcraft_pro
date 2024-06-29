@@ -89,6 +89,9 @@ dependencies:
   crypto:
     specifier: ^1.0.1
     version: 1.0.1
+  date-fns:
+    specifier: ^3.6.0
+    version: 3.6.0
   dotenv-cli:
     specifier: ^7.3.0
     version: 7.4.2
