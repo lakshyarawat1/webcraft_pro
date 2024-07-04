@@ -36,101 +36,91 @@ export const getAuthUserDetails = async () => {
 }
 
 export const saveActivityLogsNotification = async ({
-    agencyId,
-    description,
-    subAccountId,
+  agencyId,
+  description,
+  subAccountId,
 }: {
-        agencyId?: string,
-        description: string,
-        subAccountId?: string
+  agencyId?: string
+  description: string
+  subAccountId?: string
 }) => {
-    const authUser = await currentUser();
+  const authUser = await currentUser()
+  let userData
+  if (!authUser) {
+    const response = await db.user.findFirst({
+      where: {
+        agency: {
+          subAccount: {
+            some: { id: subAccountId },
+          },
+        },
+      },
+    })
+    if (response) {
+      userData = response
+    }
+  } else {
+    userData = await db.user.findUnique({
+      where: { email: authUser?.emailAddresses[0].emailAddress },
+    })
+  }
 
-    let userData
-    if (!authUser) {
-        const response = await db.user.findFirst({
-            where: {
-                agency: {
-                    subAccount: {
-                        some : { id : subAccountId }
-                    }
-                }
-            }
-        })
-         if (response) {
-            userData = response
-        } 
-    }
-    else {
-        userData = await db.user.findUnique({
-            where: {
-                email : authUser?.emailAddresses[0].emailAddress
-            }
-        })
-    }
+  if (!userData) {
+    console.log('Could not find a user')
+    return
+  }
 
-    if (!userData) {
-        console.log("Could not find user");
-        return;
+  let foundAgencyId = agencyId
+  if (!foundAgencyId) {
+    if (!subAccountId) {
+      throw new Error(
+        'You need to provide atleast an agency Id or subaccount Id'
+      )
     }
-
-    let foundAgencyId = agencyId;
-    if (!foundAgencyId) {
-        if (!subAccountId) {
-            throw new Error("You need to provide at least a subAccountId or an agencyId");
-        }
-        const response = await db.subAccount.findUnique({
-            where: {
-                id : subAccountId
-            }
-        })
-
-        if (response) {
-            foundAgencyId = response.agencyId;
-        }
-    }
-
-    if (subAccountId) {
-        await db.notification.create({
-            data: {
-                id: generateRandomUUID(),
-                notification: `${userData.name} | ${description}`,
-                User: {
-                    connect: {
-                        id : userData.id
-                    }
-                },
-                Agency: {
-                    connect: {
-                        id : foundAgencyId ?? '',
-                    }
-                },
-                SubAccount: {
-                    connect: {
-                        id : subAccountId
-                    }
-                }
-            }
-        })
-    }
-    else {
-        await db.notification.create({
-            data: {
-                id: generateRandomUUID(),
-                notification: `${userData.name} | ${description}`,
-                User: {
-                    connect: {
-                        id : userData.id
-                    }
-                },
-                Agency: {
-                    connect: {
-                        id : foundAgencyId ?? '',
-                    }
-                }
-            },
-        })
-    }
+    const response = await db.subAccount.findUnique({
+      where: { id: subAccountId },
+    })
+    if (response) foundAgencyId = response.agencyId
+  }
+  if (subAccountId) {
+    await db.notification.create({
+        data: {
+          id: generateRandomUUID(),
+        notification: `${userData.name} | ${description}`,
+        User: {
+          connect: {
+            id: userData.id,
+          },
+        },
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+        SubAccount: {
+          connect: { id: subAccountId },
+        },
+      },
+    })
+  } else {
+    await db.notification.create({
+        data: {
+          id: generateRandomUUID(),
+          
+        notification: `${userData.name} | ${description}`,
+        User: {
+          connect: {
+            id: userData.id,
+          },
+        },
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+      },
+    })
+  }
 }
 
 export const createTeamUser = async (agencyId: string, user : User) => {
@@ -831,7 +821,10 @@ export const searchContacts = async (searchTerms : string) => {
     return res;
 }
 
-export const upsertTicket = async (ticket : Prisma.TicketUncheckedCreateInput, tags: Tag[]) => {
+export const upsertTicket = async (ticket: Prisma.TicketUncheckedCreateInput, tags: Tag[]) => {
+    
+    console.log(ticket)
+
     let order: number = 0;
     if (!ticket.order) {
         const tickets = await db.ticket.findMany({

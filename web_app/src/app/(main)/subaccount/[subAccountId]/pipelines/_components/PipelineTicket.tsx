@@ -1,4 +1,4 @@
-import TicketForm from "@/components/forms/TicketForm"
+import TicketForm from "@/components/forms/TicketForm";
 import CustomModal from "@/components/global/CustomModal";
 import TagComponent from "@/components/global/TagComponent";
 import LinkIcon from "@/components/icons/link";
@@ -37,7 +37,6 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { deleteTicket, saveActivityLogsNotification } from "@/lib/queries";
 import { TicketWithTags } from "@/lib/types";
-import { hexToString } from "@/lib/utils";
 import { useModal } from "@/providers/model-provider";
 import { Contact2, Edit, MoreHorizontalIcon, Trash, User2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -113,7 +112,8 @@ const PipelineTicket = ({
       console.log(error);
     }
   };
-  console.log(ticket)
+
+  console.log(ticket, ticket.Customer, subAccountId)
 
   return (
     <Draggable draggableId={ticket.id.toString()} index={index}>
@@ -211,12 +211,12 @@ const PipelineTicket = ({
                       <div className="flex flex-col justify-center">
                         <span className="text-sm text-muted-foreground">
                           {ticket.assignedUserId
-                            ? `Assigned to`
+                            ? "Assigned to"
                             : "Not Assigned"}
                         </span>
                         {ticket.assignedUserId && (
                           <span className="text-xs w-28  overflow-ellipsis overflow-hidden whitespace-nowrap text-muted-foreground">
-                            {ticket.Assigned?.name} 
+                            {ticket.Assigned?.name}
                           </span>
                         )}
                       </div>

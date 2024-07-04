@@ -119,8 +119,7 @@ const TicketForm = ({ laneId, subAccountId, getNewTicket }: Props) => {
     if (!laneId) return;
 
     const user = await getUserByClerkId(assignedTo);
-    const userData = await getUser(user?.id || "")
-    console.log(userData)
+    const userData = await getUser(user?.id || "");
 
     try {
       const res = await upsertTicket(
@@ -135,13 +134,12 @@ const TicketForm = ({ laneId, subAccountId, getNewTicket }: Props) => {
       );
 
       await saveActivityLogsNotification({
-        agencyId: undefined,
         description: `Updated a ticket | ${res?.name}`,
         subAccountId: subAccountId,
       });
 
       toast({
-        title: "success",
+        title: "Success",
         description: "Saved Details !",
       });
 
@@ -156,6 +154,7 @@ const TicketForm = ({ laneId, subAccountId, getNewTicket }: Props) => {
     setClose();
   };
 
+  console.log(subAccountId);
 
   return (
     <Card>
@@ -204,7 +203,13 @@ const TicketForm = ({ laneId, subAccountId, getNewTicket }: Props) => {
                 <FormItem>
                   <FormLabel>Ticket Value</FormLabel>
                   <FormControl>
-                    <Input placeholder="Value" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value))} />
+                    <Input
+                      placeholder="Value"
+                      {...field}
+                      onChange={(e) =>
+                        field.onChange(parseFloat(e.target.value))
+                      }
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -274,16 +279,15 @@ const TicketForm = ({ laneId, subAccountId, getNewTicket }: Props) => {
                     placeholder="Search..."
                     className="h-9"
                     value={search}
-                    onChangeCapture={async (value) => {
-                      //@ts-ignore
-                      setSearch(value.target.value);
+                    onChangeCapture={async (
+                      event: React.ChangeEvent<HTMLInputElement>
+                    ) => {
+                      const value = event.target.value;
+                      setSearch(value);
                       if (saveTimerRef.current)
                         clearTimeout(saveTimerRef.current);
                       saveTimerRef.current = setTimeout(async () => {
-                        const response = await searchContacts(
-                          //@ts-ignore
-                          value.target.value
-                        );
+                        const response = await searchContacts(value);
                         setcontactList(response);
                         setSearch("");
                       }, 1000);
@@ -295,14 +299,15 @@ const TicketForm = ({ laneId, subAccountId, getNewTicket }: Props) => {
                       <CommandItem
                         key={c.id}
                         value={c.id}
-                        onSelect={(currentValue) => {
+                        onSelect={(
+                          currentValue: React.SetStateAction<string>
+                        ) => {
                           setContact(
                             currentValue === contact ? "" : currentValue
                           );
                         }}
                       >
                         {c.name}
-
                         <CheckIcon
                           className={cn(
                             "ml-auto h-4 w-4",
