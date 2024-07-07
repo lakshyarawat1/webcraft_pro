@@ -154,7 +154,6 @@ const TicketForm = ({ laneId, subAccountId, getNewTicket }: Props) => {
     setClose();
   };
 
-  console.log(subAccountId);
 
   return (
     <Card>

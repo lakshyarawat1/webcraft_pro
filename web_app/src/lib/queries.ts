@@ -689,7 +689,6 @@ export const updateLanesOrder = async (lanes: Lane[]) => {
             })
         })
         await db.$transaction(updatedLanes)
-        console.log('Done reordering')
     } catch (err) {
         console.log(err, 'ERROR UPDATE LANES ORDER')
     }
@@ -708,7 +707,6 @@ export const updateTicketOrder = async (tickets : Ticket[]) => {
         })
 
         await db.$transaction(updateTerms);
-        console.log('Done reordering')
     } catch (err) {
         console.log(err, 'COULD NOT UPDATE ORDER')
     }
@@ -823,8 +821,6 @@ export const searchContacts = async (searchTerms : string) => {
 
 export const upsertTicket = async (ticket: Prisma.TicketUncheckedCreateInput, tags: Tag[]) => {
     
-    console.log(ticket)
-
     let order: number = 0;
     if (!ticket.order) {
         const tickets = await db.ticket.findMany({
@@ -928,4 +924,34 @@ export const upsertContact = async (contact : Prisma.ContactUncheckedCreateInput
         create : contact,
     })
     return res;
-}   
+}  
+
+export const upsertSubscription = async(agencyId: string, plan: any, planTitle: any) => {
+    const res = await db.subscription.upsert({
+        where: {
+            agencyId: agencyId
+        },
+                update: {
+                  priceId: plan.priceId,
+                  customerId: agencyId,
+                  active: true,
+                  currentPeriodEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+            subscritiptionId: generateRandomUUID(),
+            plan: planTitle,
+            price: plan.price,
+                  agencyId: agencyId
+        },
+        create: {
+            id: generateRandomUUID(),
+                      priceId: plan.priceId,
+                  customerId: agencyId,
+                  active: true,
+                  currentPeriodEndDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+            subscritiptionId: generateRandomUUID(),
+            plan: planTitle,
+            price: plan.price,
+                  agencyId: agencyId 
+                }
+    });
+    return res;
+}
