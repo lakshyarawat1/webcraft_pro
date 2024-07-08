@@ -1,5 +1,5 @@
 import { Contact, Lane, Notification, Prisma, Role, Tag, Ticket, User } from "@prisma/client"
-import { _getTicketsWithAllRelations, getAuthUserDetails, getMedia, getPipeLineDetails, getTicketsWithTags, getUserPermissions } from "./queries"
+import { _getTicketsWithAllRelations, getAuthUserDetails, getFunnels, getMedia, getPipeLineDetails, getTicketsWithTags, getUserPermissions } from "./queries"
 import { db } from "./db"
 import { z } from "zod"
 
@@ -87,4 +87,13 @@ export const TicketFormSchema = z.object({
 export const ContactUserFormSchema = z.object({
   name: z.string().min(1, 'Required'),
   email :  z.string().email(),
+})
+
+export type FunnelsForSubAccount = Prisma.PromiseReturnType<typeof getFunnels>[0]
+
+export type UpsertFunnelPage = Prisma.FunnelPageCreateWithoutFunnelInput
+
+export const FunnelPageSchema = z.object({
+  name: z.string().min(1),
+  pathName : z.string().optional()
 })

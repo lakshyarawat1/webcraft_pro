@@ -5,8 +5,9 @@ import { db } from "./db";
 import { redirect } from "next/navigation";
 import { Agency, Lane, Plan, Prisma, Role, SubAccount, Tag, Ticket, User } from "@prisma/client";
 import { generateRandomUUID } from "./utils";
-import { CreateFunnelFormSchema, CreateMediaType } from "./types";
+import { CreateFunnelFormSchema, CreateMediaType, UpsertFunnelPage } from "./types";
 import { z } from "zod";
+import { revalidatePath } from "next/cache";
 
 export const getAuthUserDetails = async () => {
     const user = await currentUser()
@@ -953,5 +954,86 @@ export const upsertSubscription = async(agencyId: string, plan: any, planTitle: 
                   agencyId: agencyId 
                 }
     });
+    return res;
+}
+
+export const getFunnels = async (subAccountId: string) => {
+    const funnels = await db.funnel.findMany({
+        where: {
+            subAccountId: subAccountId
+        },
+        include: {
+            FunnelPages : true,
+        }
+    })
+
+    return funnels;
+}
+
+export const getFunnel = async (funnelId: string) => {
+    const funnel = await db.funnel.findUnique({
+        where: {
+            id : funnelId
+        },
+        include: {
+            FunnelPages: {
+                orderBy: {
+                    order : 'asc'
+                }
+            }
+        }
+    })
+    return funnel;
+}
+
+export const updateFunnelProducts = async (products: string, funnelId: string) => {
+    const data = await db.funnel.update({
+        where: {
+            id : funnelId,
+        },
+        data: {
+            liveProducts: products
+        }
+    })
+}
+
+export const upsertFunnelPage = async (subAccountId: string, funnelPage: UpsertFunnelPage, funnelId: string) => {
+    if (!subAccountId || !funnelId) return;
+    const res = await db.funnelPage.upsert({
+        where: { id: funnelPage.id || "" },
+        update: { 
+            name: funnelPage.name,
+            pathName: funnelPage.pathName,
+            order: funnelPage.order,
+            visits: funnelPage.visits,
+            content: funnelPage.content,
+            previewImage: funnelPage.previewImage,
+            
+         },
+        create: {
+            ...funnelPage,
+            content: funnelPage.content ? funnelPage.content : JSON.stringify([
+                {
+                    content: [],
+                    id: "__body",
+                    name: "Body",
+                    styles: { backgroundColor: 'white' },
+                    type: "__body"
+                }
+            ]),
+            funnelId
+        }
+    })
+
+    revalidatePath(`/subaccount/${subAccountId}/funnels/${funnelId}`,'page')
+    return res;
+}
+
+export const deleteFunnelPage = async (funnelPageId: string) => {
+    const res = await db.funnelPage.delete({
+        where: {
+            id: funnelPageId,
+        }
+    })
     return res;
 }
