@@ -30,7 +30,11 @@ const page = async ({ params }: Props) => {
         funnelId={params.funnelId}
         pageDetails={funnelPageDetails}
       >
-        <FunnelEditorNavigation />
+        <FunnelEditorNavigation
+          subAccountId={params.subAccountId}
+          funnelId={params.funnelId}
+          funnelPageDetails={funnelPageDetails}
+        />
       </EditorProvider>
     </div>
   )
