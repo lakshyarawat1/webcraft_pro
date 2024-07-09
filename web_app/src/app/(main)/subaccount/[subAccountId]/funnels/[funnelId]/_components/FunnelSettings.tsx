@@ -33,11 +33,11 @@ const FunnelSettings: React.FC<FunnelSettingsProps> = async ({
 
   const products = [
     {
-     id:"",
-      name: "",
-      images : ["",""]
-    }
-  ]
+      id: "1",
+      name: "Home",
+      images: ["", ""],
+    },
+  ];
 
   return (
     <div className="flex gap-4 flex-col xl:!flex-row">
@@ -52,7 +52,10 @@ const FunnelSettings: React.FC<FunnelSettingsProps> = async ({
         <CardContent>
           <>
             {subaccountDetails.connectAccountId ? (
-              <FunnelProductsTable defaultData={defaultData} products={products} />
+              <FunnelProductsTable
+                defaultData={defaultData}
+                products={products}
+              />
             ) : (
               "Connect your stripe account to sell products."
             )}
