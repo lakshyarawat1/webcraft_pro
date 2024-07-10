@@ -3,6 +3,7 @@ import EditorProvider from '@/providers/editor/EditorProvider'
 import { redirect } from 'next/navigation'
 import React from 'react'
 import FunnelEditorNavigation from './_components/FunnelEditorNavigation'
+import FunnelEditorSidebar from './_components/funnelEditorSidebar'
 
 type Props = {
   params: {
@@ -35,6 +36,7 @@ const page = async ({ params }: Props) => {
           funnelId={params.funnelId}
           funnelPageDetails={funnelPageDetails}
         />
+        <FunnelEditorSidebar subAccountId={params.subAccountId} />
       </EditorProvider>
     </div>
   )
