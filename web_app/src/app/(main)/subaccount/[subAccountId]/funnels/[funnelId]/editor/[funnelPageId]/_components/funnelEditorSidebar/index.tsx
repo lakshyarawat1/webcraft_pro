@@ -1,12 +1,19 @@
 "use client";
 
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList } from "@/components/ui/tabs";
 import { useEditor } from "@/providers/editor/EditorProvider";
 import clsx from "clsx";
 import React from "react";
 import TabList from "./tabs";
 import SettingsTab from "./tabs/SettingsTab";
+import MediaBucketTab from "./tabs/MediaBucketTab";
 
 type Props = {
   subAccountId: string;
@@ -39,9 +46,15 @@ const FunnelEditorSidebar = ({ subAccountId }: Props) => {
             <TabsContent value="Settings">
               <SheetHeader className="text-left p-6">
                 <SheetTitle>Styles</SheetTitle>
-                <SheetDescription>Show your creativity ! You can customize every component as you like.</SheetDescription>
+                <SheetDescription>
+                  Show your creativity ! You can customize every component as
+                  you like.
+                </SheetDescription>
               </SheetHeader>
               <SettingsTab />
+            </TabsContent>
+            <TabsContent value="Media">
+              <MediaBucketTab subAccountId={subAccountId} />
             </TabsContent>
           </div>
         </SheetContent>
