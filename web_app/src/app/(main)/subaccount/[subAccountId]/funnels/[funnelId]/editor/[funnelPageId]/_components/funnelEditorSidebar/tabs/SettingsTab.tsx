@@ -48,6 +48,8 @@ const SettingsTab = (props: Props) => {
       [styleSettings]: value,
     };
 
+    console.log(e.target.value)
+
     dispatch({
       type: "UPDATE_ELEMENT",
       payload: {

@@ -1037,3 +1037,12 @@ export const deleteFunnelPage = async (funnelPageId: string) => {
     })
     return res;
 }
+
+export const getFunnelPageDetails = async (funnelPageId: string) => {
+    const res = await db.funnelPage.findUnique({
+        where: {
+            id: funnelPageId
+        }
+    })
+    return res;
+}
