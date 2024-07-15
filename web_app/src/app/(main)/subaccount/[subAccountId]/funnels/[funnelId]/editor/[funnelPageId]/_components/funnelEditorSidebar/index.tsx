@@ -14,6 +14,7 @@ import React from "react";
 import TabList from "./tabs";
 import SettingsTab from "./tabs/SettingsTab";
 import MediaBucketTab from "./tabs/MediaBucketTab";
+import ComponentsTab from "./tabs/componentsTabs";
 
 type Props = {
   subAccountId: string;
@@ -55,6 +56,13 @@ const FunnelEditorSidebar = ({ subAccountId }: Props) => {
             </TabsContent>
             <TabsContent value="Media">
               <MediaBucketTab subAccountId={subAccountId} />
+            </TabsContent>
+            <TabsContent value="Components">
+              <SheetHeader className="text-left p-6">
+                <SheetTitle>Components</SheetTitle>
+                <SheetDescription>You can drag and drop components on the canvas.</SheetDescription>
+              </SheetHeader>
+              <ComponentsTab />
             </TabsContent>
           </div>
         </SheetContent>

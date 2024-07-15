@@ -41,6 +41,7 @@ const Container = ({ element }: Props) => {
             },
           },
         });
+        break;
       case "container":
         dispatch({
           type: "ADD_ELEMENT",
@@ -55,6 +56,91 @@ const Container = ({ element }: Props) => {
             },
           },
         });
+        break;
+      case "video":
+        dispatch({
+          type: "ADD_ELEMENT",
+          payload: {
+            containerId: id,
+            elementDetails: {
+              content: {
+                src: "https://www.youtube.com/embed/5ZKLM5pNoGQ?si=tzYVq5MpC_b9yohU",
+              },
+              id: generateRandomUUID(),
+              name: "Video",
+              styles: {},
+              type: "video",
+            },
+          },
+        });
+        break;
+      case "link":
+        dispatch({
+          type: "ADD_ELEMENT",
+          payload: {
+            containerId: id,
+            elementDetails: {
+              content: {
+                innerText: "Link Element",
+                href: "#",
+              },
+              id: generateRandomUUID(),
+              name: "Link",
+              styles: {
+                color: "black",
+                ...defaultStyles,
+              },
+              type: "link",
+            },
+          },
+        });
+        break;
+      case "2Col":
+        dispatch({
+          type: "ADD_ELEMENT",
+          payload: {
+            containerId: id,
+            elementDetails: {
+              content: [
+                {
+                  content: [],
+                  id: generateRandomUUID(),
+                  name: "Container",
+                  styles: { ...defaultStyles, width: "100%" },
+                  type: "container",
+                },
+                {
+                  content: [],
+                  id: generateRandomUUID(),
+                  name: "Container",
+                  styles: { ...defaultStyles, width: "100%" },
+                  type: "container",
+                },
+              ],
+              id: generateRandomUUID(),
+              name: "Two Columns",
+              styles: { ...defaultStyles, display: "flex" },
+              type: "2Col",
+            },
+          },
+        });
+        break;
+      case "contactForm":
+        dispatch({
+          type: "ADD_ELEMENT",
+          payload: {
+            containerId: id,
+            elementDetails: {
+              content: [],
+              id: generateRandomUUID(),
+              name: "Contact Form",
+              styles: {},
+              type: "contactForm",
+            },
+          },
+        });
+        break;
+      default:
     }
   };
 
@@ -84,7 +170,7 @@ const Container = ({ element }: Props) => {
         elementDetails: element,
       },
     });
-  };        
+  };
 
   return (
     <div

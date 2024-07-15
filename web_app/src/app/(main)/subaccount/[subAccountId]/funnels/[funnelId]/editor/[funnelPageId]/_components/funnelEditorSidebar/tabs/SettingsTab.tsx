@@ -1,5 +1,5 @@
 "use client";
-import React, { ChangeEventHandler } from "react";
+import React, { ChangeEventHandler, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -41,14 +41,19 @@ type Props = {};
 const SettingsTab = (props: Props) => {
   const { state, dispatch } = useEditor();
 
+  const [key, setKey] = useState(0);
+
+  console.log(state);
+
   const handleOnChanges = (e: any) => {
+    console.log(e.target.value);
     const styleSettings = e.target.id;
     let value = e.target.value;
     const styleObject = {
       [styleSettings]: value,
     };
 
-    console.log(e.target.value)
+    console.log(styleObject);
 
     dispatch({
       type: "UPDATE_ELEMENT",
@@ -62,6 +67,7 @@ const SettingsTab = (props: Props) => {
         },
       },
     });
+    setKey(key + 1);
   };
 
   const handleChangeCustomValues = (e: any) => {
@@ -421,6 +427,7 @@ const SettingsTab = (props: Props) => {
               />
               <Input
                 placeholder="#HFI245"
+                // key={key}
                 className="!border-y-0 rounded-none !border-r-0 mr-2"
                 id="backgroundColor"
                 onChange={handleOnChanges}

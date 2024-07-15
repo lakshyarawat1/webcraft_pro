@@ -1,5 +1,4 @@
 "use client";
-
 import { Badge } from "@/components/ui/badge";
 import { EditorElement, useEditor } from "@/providers/editor/EditorProvider";
 import clsx from "clsx";
@@ -11,16 +10,16 @@ type Props = {
 };
 
 const TextComponent = (props: Props) => {
-  const { state, dispatch } = useEditor();
+  console.log(props.element);
+  const { dispatch, state } = useEditor();
 
   const handleDeleteElement = () => {
     dispatch({
       type: "DELETE_ELEMENT",
-      payload: {
-        elementDetails: props.element,
-      },
+      payload: { elementDetails: props.element },
     });
   };
+  const styles = props.element.styles;
 
   const handleOnClickBody = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -31,17 +30,16 @@ const TextComponent = (props: Props) => {
       },
     });
   };
-  const styles = props.element.styles;
 
   return (
     <div
-      draggable
       style={styles}
       className={clsx(
         "p-[2px] w-full m-[5px] relative text-[16px] transition-all",
         {
           "!border-blue-500":
             state.editor.selectedElement.id === props.element.id,
+
           "!border-solid": state.editor.selectedElement.id === props.element.id,
           "border-dashed border-[1px] border-slate-300": !state.editor.liveMode,
         }
