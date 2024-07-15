@@ -1046,3 +1046,15 @@ export const getFunnelPageDetails = async (funnelPageId: string) => {
     })
     return res;
 }
+
+export const getDomainContent = async (subDomainName : string) => {
+    const res = await db.funnel.findUnique({
+        where: {
+                subDomainName
+        },
+        include: {
+            FunnelPages : true
+        }
+    })
+    return res;
+}
