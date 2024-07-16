@@ -59,7 +59,7 @@ interface SheetContentProps
   extends React.ComponentPropsWithoutRef<typeof SheetPrimitive.Content>,
     CustomSheetContentProps,
     VariantProps<typeof sheetVariants> {
-    className?: string,
+    className: string,
     }
 
 const SheetContent = React.forwardRef<
