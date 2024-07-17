@@ -135,6 +135,7 @@ const AgencyDetails = ({ data }: Props) => {
 
       const res = await upsertAgency({
         id: data?.id ? data.id : generateRandomUUID(),
+        customerId: "",
         address: values.address,
         agencyLogo: values.agencyLogo,
         city: values.city,
