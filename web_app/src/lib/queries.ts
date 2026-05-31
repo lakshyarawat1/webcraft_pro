@@ -196,11 +196,25 @@ export const updateAgencyDetails = async (agencyId: string, agencyDetails: Parti
 }
 
 export const deleteAgency = async (agencyId: string) => {
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const userData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!userData || userData.role !== 'AGENCY_OWNER' || userData.agencyId !== agencyId) {
+      throw new Error('Unauthorized to delete this agency')
+    }
+
     const res = await db.agency.delete({
         where: {
             id : agencyId
         }
     })
+    return res;
 }
 
 export const initUser = async (newUser: Partial<User>) => {
@@ -439,6 +453,43 @@ export const getUserPermissions = async (userId: string) => {
 }
 
 export const updateUser = async (user: Partial<User>) => {
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData) {
+      throw new Error('Unauthorized')
+    }
+
+    if (!user.email) {
+        throw new Error('User email is required')
+    }
+
+    // Fetch the target user to verify they belong to the same agency
+    const targetUser = await db.user.findUnique({
+      where: { email: user.email },
+    })
+
+    if (!targetUser) {
+        throw new Error('User not found')
+    }
+
+    // Check if user is updating themselves OR they have appropriate agency permissions
+    if (authUserData.email !== targetUser.email) {
+      if (
+        (authUserData.role !== 'AGENCY_OWNER' && authUserData.role !== 'AGENCY_ADMIN') ||
+        !authUserData.agencyId ||
+        authUserData.agencyId !== targetUser.agencyId
+      ) {
+        throw new Error('Unauthorized to update this user')
+      }
+    }
+
     const response = await db.user.update({
         where: {
             email : user.email
