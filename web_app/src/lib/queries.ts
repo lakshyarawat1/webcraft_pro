@@ -717,13 +717,14 @@ export const upsertLane = async (lane : Prisma.LaneUncheckedCreateInput) => {
     let order: number = 0;
 
     if (!lane.order) {
-        const lanes = await db.lane.findMany({
+        // Optimize: use count instead of fetching all records to memory
+        const lanesLength = await db.lane.count({
             where: {
                 pipelineId: lane.pipelineId
             }
         });
 
-        order = lanes.length;
+        order = lanesLength;
     }
     else {
         order = lane.order;
@@ -824,13 +825,14 @@ export const upsertTicket = async (ticket: Prisma.TicketUncheckedCreateInput, ta
     
     let order: number = 0;
     if (!ticket.order) {
-        const tickets = await db.ticket.findMany({
+        // Optimize: use count instead of fetching all records to memory
+        const ticketsLength = await db.ticket.count({
             where: {
                 laneId: ticket.laneId
             },
             
         })
-        order = tickets.length
+        order = ticketsLength
     }
     else {
         order = ticket.order
