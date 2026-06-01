@@ -541,6 +541,27 @@ export const getSubAccountDetails = async (subAccountId : string) => {
 }
 
 export const deleteSubAccount = async (subAccountId: string) => {
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData || (authUserData.role !== 'AGENCY_OWNER' && authUserData.role !== 'AGENCY_ADMIN')) {
+      throw new Error('Unauthorized to delete this subaccount')
+    }
+
+    const subAccount = await db.subAccount.findUnique({
+        where: { id: subAccountId }
+    })
+
+    if (!subAccount || subAccount.agencyId !== authUserData.agencyId) {
+        throw new Error('Unauthorized to delete this subaccount')
+    }
+
     const res = await db.subAccount.delete({
         where: {
             id: subAccountId
