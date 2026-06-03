@@ -187,6 +187,23 @@ export const verifyAndAcceptInvitation = async () => {
 }
 
 export const updateAgencyDetails = async (agencyId: string, agencyDetails: Partial<Agency>) => {
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const userData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (
+      !userData ||
+      (userData.role !== 'AGENCY_OWNER' && userData.role !== 'AGENCY_ADMIN') ||
+      userData.agencyId !== agencyId
+    ) {
+      throw new Error('Unauthorized to update this agency')
+    }
+
     const response = await db.agency.update({
         where: { id: agencyId },
         data: { ...agencyDetails }
