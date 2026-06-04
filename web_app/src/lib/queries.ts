@@ -187,6 +187,21 @@ export const verifyAndAcceptInvitation = async () => {
 }
 
 export const updateAgencyDetails = async (agencyId: string, agencyDetails: Partial<Agency>) => {
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const userData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    // 🛡️ Security Fix: Added explicit RBAC check to prevent IDOR vulnerability.
+    // Only agency owners and admins from the same agency can update agency details.
+    if (!userData || (userData.role !== 'AGENCY_OWNER' && userData.role !== 'AGENCY_ADMIN') || userData.agencyId !== agencyId) {
+      throw new Error('Unauthorized to update this agency')
+    }
+
     const response = await db.agency.update({
         where: { id: agencyId },
         data: { ...agencyDetails }
