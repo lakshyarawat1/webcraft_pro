@@ -585,6 +585,38 @@ export const deleteSubAccount = async (subAccountId: string) => {
 }
 
 export const deleteUser = async (userId: string) => {
+  // 🛡️ SECURITY: Verify user is authenticated
+  const authUser = await currentUser()
+  if (!authUser) {
+    throw new Error('Unauthorized')
+  }
+
+  const authUserData = await db.user.findUnique({
+    where: { email: authUser.emailAddresses[0].emailAddress },
+  })
+
+  if (!authUserData) {
+    throw new Error('Unauthorized')
+  }
+
+  // 🛡️ SECURITY: Fetch target user
+  const targetUser = await db.user.findUnique({
+    where: { id: userId },
+  })
+
+  if (!targetUser) {
+    throw new Error('User not found')
+  }
+
+  // 🛡️ SECURITY: Verify authorization to prevent IDOR
+  if (
+    (authUserData.role !== 'AGENCY_OWNER' && authUserData.role !== 'AGENCY_ADMIN') ||
+    !authUserData.agencyId ||
+    authUserData.agencyId !== targetUser.agencyId
+  ) {
+    throw new Error('Unauthorized to delete this user')
+  }
+
   await clerkClient.users.updateUserMetadata(userId, {
     privateMetadata: {
       role: undefined,
