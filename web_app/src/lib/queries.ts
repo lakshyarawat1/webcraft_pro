@@ -522,6 +522,31 @@ export const updateUser = async (user: Partial<User>) => {
 }
 
 export const changeUserPermissions = async (permissionId: string | undefined, userEmail : string, subAccountId : string, permissions: boolean) => {
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData) {
+      throw new Error('Unauthorized')
+    }
+
+    if (authUserData.role !== 'AGENCY_OWNER' && authUserData.role !== 'AGENCY_ADMIN') {
+        throw new Error('Unauthorized to change permissions')
+    }
+
+    const subAccount = await db.subAccount.findUnique({
+        where: { id: subAccountId }
+    })
+
+    if (!subAccount || subAccount.agencyId !== authUserData.agencyId) {
+        throw new Error('Unauthorized to change permissions for this subaccount')
+    }
+
     try {
         const res = await db.permission.upsert({
             where: {
