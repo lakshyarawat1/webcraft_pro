@@ -811,6 +811,49 @@ export const upsertPipeline = async (pipeline: Prisma.PipelineUncheckedCreateWit
 }
 
 export const deletePipeline = async (pipelineId: string) => {
+    // 🛡️ SECURITY: Verify user is authenticated
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData) {
+      throw new Error('Unauthorized')
+    }
+
+    // 🛡️ SECURITY: Fetch target pipeline and verify authorization
+    const pipeline = await db.pipeline.findUnique({
+        where: { id: pipelineId },
+        include: { SubAccount: true }
+    })
+
+    if (!pipeline || !pipeline.SubAccount) {
+        throw new Error('Pipeline not found')
+    }
+
+    // Check if the user belongs to the same agency
+    if (pipeline.SubAccount.agencyId !== authUserData.agencyId) {
+        throw new Error('Unauthorized to delete this pipeline')
+    }
+
+    // If they are a subaccount user, check permissions
+    if (authUserData.role === 'SUBACCOUNT_USER' || authUserData.role === 'SUBACCOUNT_GUEST') {
+        const hasPermission = await db.permission.findFirst({
+            where: {
+                userId: authUserData.id,
+                subAccountId: pipeline.subAccountId,
+                access: true
+            }
+        })
+        if (!hasPermission) {
+            throw new Error('Unauthorized to delete this pipeline')
+        }
+    }
+
     const res = await db.pipeline.delete({
         where : {
             id: pipelineId
