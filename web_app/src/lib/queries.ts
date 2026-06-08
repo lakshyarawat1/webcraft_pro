@@ -731,6 +731,49 @@ export const createMedia = async (subAccountId: string, mediaFile: CreateMediaTy
 }
 
 export const deleteMedia = async (mediaId: string) => {
+    // 🛡️ SECURITY: Verify user is authenticated
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData) {
+      throw new Error('Unauthorized')
+    }
+
+    // 🛡️ SECURITY: Fetch target media and verify authorization
+    const media = await db.media.findUnique({
+        where: { id: mediaId },
+        include: { Subaccount: true }
+    })
+
+    if (!media || !media.Subaccount) {
+        throw new Error('Media not found')
+    }
+
+    // Check if the user belongs to the same agency
+    if (media.Subaccount.agencyId !== authUserData.agencyId) {
+        throw new Error('Unauthorized to delete this media')
+    }
+
+    // If they are a subaccount user, check permissions
+    if (authUserData.role === 'SUBACCOUNT_USER' || authUserData.role === 'SUBACCOUNT_GUEST') {
+        const hasPermission = await db.permission.findFirst({
+            where: {
+                email: authUserData.email,
+                subAccountId: media.subAccountId,
+                access: true
+            }
+        })
+        if (!hasPermission) {
+            throw new Error('Unauthorized to delete this media')
+        }
+    }
+
     const res = await db.media.delete({
         where: {
             id: mediaId

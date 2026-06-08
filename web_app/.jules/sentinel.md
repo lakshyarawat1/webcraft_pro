@@ -1,0 +1,4 @@
+## 2024-07-29 - [Missing Authorization in Server Actions]
+**Vulnerability:** Found multiple server actions (e.g., `deleteMedia`, `deleteFunnelPage`, `deleteLane`, `deleteTicket`) that perform database deletion based only on an ID, completely lacking `currentUser()` authentication checks and `db.permission` authorization checks. This creates an Insecure Direct Object Reference (IDOR) vulnerability.
+**Learning:** Next.js Server Actions act as exposed API endpoints. Without explicit authorization checks inside the action, an attacker could invoke the action with any ID and delete records belonging to other users or agencies.
+**Prevention:** Every server action that mutates or accesses data MUST explicitly verify the caller's identity via `currentUser()` AND verify that the authenticated user has permission to access the target object (e.g., checking `agencyId` match or explicit role permissions).
