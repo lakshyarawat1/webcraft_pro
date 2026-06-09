@@ -16,3 +16,8 @@
 **Vulnerability:** The `deletePipeline` Server Action in `web_app/src/lib/queries.ts` lacked both authentication and authorization checks. It directly deleted a pipeline based on the provided `pipelineId`.
 **Learning:** Next.js Server Actions function as publicly exposed API endpoints. Without verifying permissions, it allowed for Insecure Direct Object Reference (IDOR). Any caller could potentially exploit this to delete arbitrary pipelines by ID.
 **Prevention:** Always verify `currentUser()` for authentication and cross-reference the user's agency ID against the target object's agency ID before performing sensitive operations in Server Actions. Ensure that users with roles like `SUBACCOUNT_USER` have explicit permissions for the subaccount.
+
+## 2026-06-09 - Missing IDOR Prevention in upsertSubAccount Action
+**Vulnerability:** The `upsertSubAccount` Server Action in `web_app/src/lib/queries.ts` lacked authentication and authorization checks. It could allow creating or modifying arbitrary subaccounts for other agencies.
+**Learning:** Next.js Server Actions act as exposed API endpoints. Without verifying permissions via `currentUser()` and checking roles, it allowed for Insecure Direct Object Reference (IDOR).
+**Prevention:** Always verify `currentUser()` for authentication and ensure the user has appropriate roles (e.g., `AGENCY_OWNER` or `AGENCY_ADMIN`) and their `agencyId` matches the target object's `agencyId` before performing modifications in Server Actions.

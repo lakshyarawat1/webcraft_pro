@@ -352,7 +352,52 @@ export const getNotificationAndUser = async (agencyId: string) => {
 export const upsertSubAccount = async (subAccount: SubAccount) => {
     if (!subAccount.companyEmail) return null;
 
-    const agencyOwner = await db.user.findFirst({ where: { agency: { id: subAccount.agencyId }, role: 'AGENCY_OWNER' } })
+    // 🛡️ SECURITY: Verify user is authenticated
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData) {
+      throw new Error('Unauthorized')
+    }
+
+    // 🛡️ SECURITY: Verify authorization to prevent IDOR
+    const existingSubAccount = await db.subAccount.findUnique({
+      where: { id: subAccount.id },
+    })
+
+    if (!authUserData.agencyId) {
+      throw new Error('Unauthorized to modify this subaccount')
+    }
+
+    if (existingSubAccount) {
+        if (existingSubAccount.agencyId !== authUserData.agencyId) {
+            throw new Error('Unauthorized to modify this subaccount')
+        }
+
+        if (authUserData.role !== 'AGENCY_OWNER' && authUserData.role !== 'AGENCY_ADMIN') {
+            const hasPermission = await db.permission.findFirst({
+                where: { subAccountId: subAccount.id, email: authUserData.email, access: true }
+            })
+            if (!hasPermission) {
+                throw new Error('Unauthorized to modify this subaccount')
+            }
+        }
+    } else {
+        if (authUserData.role !== 'AGENCY_OWNER' && authUserData.role !== 'AGENCY_ADMIN') {
+            throw new Error('Unauthorized to create a subaccount')
+        }
+        if (subAccount.agencyId !== authUserData.agencyId) {
+             throw new Error('Unauthorized to create a subaccount for this agency')
+        }
+    }
+
+    const agencyOwner = await db.user.findFirst({ where: { agency: { id: existingSubAccount ? existingSubAccount.agencyId : subAccount.agencyId }, role: 'AGENCY_OWNER' } })
     
     if (!agencyOwner) return console.log('Error could not create subAccount')
     
