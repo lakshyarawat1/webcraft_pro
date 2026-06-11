@@ -883,6 +883,44 @@ export const upsertFunnel = async (
 }
 
 export const upsertPipeline = async (pipeline: Prisma.PipelineUncheckedCreateWithoutLaneInput) => {
+    // 🛡️ SECURITY: Verify user is authenticated and authorized
+    const authUser = await currentUser()
+    if (!authUser) throw new Error('Unauthorized')
+
+    const authUserData = await db.user.findUnique({
+        where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+    if (!authUserData) throw new Error('Unauthorized')
+
+    // 🛡️ SECURITY: If updating an existing pipeline, verify ownership of the existing record
+    if (pipeline.id) {
+        const existingPipeline = await db.pipeline.findUnique({
+            where: { id: pipeline.id },
+            include: { SubAccount: true }
+        })
+        if (existingPipeline) {
+            if (existingPipeline.SubAccount.agencyId !== authUserData.agencyId) {
+                throw new Error('Unauthorized to modify this pipeline')
+            }
+        }
+    }
+
+    // 🛡️ SECURITY: Fetch subaccount to verify agency matching for the payload's subAccountId
+    const subAccount = await db.subAccount.findUnique({
+        where: { id: pipeline.subAccountId },
+    })
+    if (!subAccount || subAccount.agencyId !== authUserData.agencyId) {
+        throw new Error('Unauthorized to modify this pipeline')
+    }
+
+    // 🛡️ SECURITY: Verify permissions for subaccount users
+    if (authUserData.role === 'SUBACCOUNT_USER' || authUserData.role === 'SUBACCOUNT_GUEST') {
+        const hasPermission = await db.permission.findFirst({
+            where: { email: authUserData.email, subAccountId: pipeline.subAccountId, access: true }
+        })
+        if (!hasPermission) throw new Error('Unauthorized to modify this pipeline')
+    }
+
     const res = await db.pipeline.upsert({
         where: {
             id: pipeline.id || generateRandomUUID()
