@@ -21,3 +21,8 @@
 **Vulnerability:** The `upsertSubAccount` Server Action in `web_app/src/lib/queries.ts` lacked authentication and authorization checks. It could allow creating or modifying arbitrary subaccounts for other agencies.
 **Learning:** Next.js Server Actions act as exposed API endpoints. Without verifying permissions via `currentUser()` and checking roles, it allowed for Insecure Direct Object Reference (IDOR).
 **Prevention:** Always verify `currentUser()` for authentication and ensure the user has appropriate roles (e.g., `AGENCY_OWNER` or `AGENCY_ADMIN`) and their `agencyId` matches the target object's `agencyId` before performing modifications in Server Actions.
+
+## 2026-06-10 - Missing IDOR Prevention in deleteLane Action
+**Vulnerability:** The `deleteLane` Server Action in `web_app/src/lib/queries.ts` lacked authentication and authorization checks. It could allow deleting arbitrary lanes for other agencies' pipelines.
+**Learning:** Next.js Server Actions act as exposed API endpoints. Without verifying permissions via `currentUser()` and checking roles or agency permissions against the nested lane -> pipeline -> subaccount -> agency relation, it allowed for Insecure Direct Object Reference (IDOR).
+**Prevention:** Always verify `currentUser()` for authentication and ensure the user has appropriate roles and permissions corresponding to the nested relations of the target object before performing destructive modifications in Server Actions.

@@ -932,7 +932,7 @@ export const deletePipeline = async (pipelineId: string) => {
     if (authUserData.role === 'SUBACCOUNT_USER' || authUserData.role === 'SUBACCOUNT_GUEST') {
         const hasPermission = await db.permission.findFirst({
             where: {
-                userId: authUserData.id,
+                email: authUserData.email,
                 subAccountId: pipeline.subAccountId,
                 access: true
             }
@@ -1019,6 +1019,49 @@ export const upsertLane = async (lane : Prisma.LaneUncheckedCreateInput) => {
 }
 
 export const deleteLane = async (laneId: string) => {
+    // 🛡️ SECURITY: Verify user is authenticated
+    const authUser = await currentUser()
+    if (!authUser) {
+      throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+      where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData) {
+      throw new Error('Unauthorized')
+    }
+
+    // 🛡️ SECURITY: Fetch target lane and verify authorization
+    const lane = await db.lane.findUnique({
+        where: { id: laneId },
+        include: { Pipeline: { include: { SubAccount: true } } }
+    })
+
+    if (!lane || !lane.Pipeline || !lane.Pipeline.SubAccount) {
+        throw new Error('Lane not found')
+    }
+
+    // Check if the user belongs to the same agency
+    if (lane.Pipeline.SubAccount.agencyId !== authUserData.agencyId) {
+        throw new Error('Unauthorized to delete this lane')
+    }
+
+    // If they are a subaccount user, check permissions
+    if (authUserData.role === 'SUBACCOUNT_USER' || authUserData.role === 'SUBACCOUNT_GUEST') {
+        const hasPermission = await db.permission.findFirst({
+            where: {
+                email: authUserData.email,
+                subAccountId: lane.Pipeline.subAccountId,
+                access: true
+            }
+        })
+        if (!hasPermission) {
+            throw new Error('Unauthorized to delete this lane')
+        }
+    }
+
     const res = await db.lane.delete({
         where: {
             id : laneId
