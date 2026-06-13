@@ -28,6 +28,7 @@ import { FunnelPageSchema } from "@/lib/types";
 import {
   deleteFunnelPage,
   getFunnels,
+  getFunnelPageCount,
   saveActivityLogsNotification,
   upsertFunnelPage,
 } from "@/lib/queries";
@@ -186,10 +187,8 @@ const CreateFunnelPage: React.FC<CreateFunnelPageProps> = ({
                   disabled={form.formState.isSubmitting}
                   type="button"
                   onClick={async () => {
-                    const response = await getFunnels(subAccountId);
-                    const lastFunnelPage = response.find(
-                      (funnel) => funnel.id === funnelId
-                    )?.FunnelPages.length;
+                    // ⚡ Bolt Optimization: Use a dedicated count query instead of fetching all funnels and pages
+                    const lastFunnelPage = await getFunnelPageCount(funnelId);
 
                     await upsertFunnelPage(
                       subAccountId,

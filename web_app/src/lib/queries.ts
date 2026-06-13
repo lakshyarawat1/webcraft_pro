@@ -421,6 +421,15 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
     return res;
 }
 
+export const getFunnelPageCount = async (funnelId: string) => {
+    const res = await db.funnelPage.count({
+        where: {
+            funnelId
+        }
+    })
+    return res;
+}
+
 export const getUserPermissions = async (userId: string) => {
     const res = await db.user.findUnique({
         where: {
