@@ -1218,6 +1218,49 @@ export const upsertTicket = async (ticket: Prisma.TicketUncheckedCreateInput, ta
 }
 
 export const deleteTicket = async (ticketId : string) => {
+    // 🛡️ SECURITY: Verify user is authenticated
+    const authUser = await currentUser()
+    if (!authUser) {
+        throw new Error('Unauthorized')
+    }
+
+    const authUserData = await db.user.findUnique({
+        where: { email: authUser.emailAddresses[0].emailAddress },
+    })
+
+    if (!authUserData) {
+        throw new Error('Unauthorized')
+    }
+
+    // 🛡️ SECURITY: Fetch target ticket and verify authorization
+    const ticket = await db.ticket.findUnique({
+        where: { id: ticketId },
+        include: { Lane: { include: { Pipeline: { include: { SubAccount: true } } } } }
+    })
+
+    if (!ticket || !ticket.Lane || !ticket.Lane.Pipeline || !ticket.Lane.Pipeline.SubAccount) {
+        throw new Error('Ticket not found')
+    }
+
+    // Check if the user belongs to the same agency
+    if (ticket.Lane.Pipeline.SubAccount.agencyId !== authUserData.agencyId) {
+        throw new Error('Unauthorized to delete this ticket')
+    }
+
+    // If they are a subaccount user, check permissions
+    if (authUserData.role === 'SUBACCOUNT_USER' || authUserData.role === 'SUBACCOUNT_GUEST') {
+        const hasPermission = await db.permission.findFirst({
+            where: {
+                email: authUserData.email,
+                subAccountId: ticket.Lane.Pipeline.subAccountId,
+                access: true
+            }
+        })
+        if (!hasPermission) {
+            throw new Error('Unauthorized to delete this ticket')
+        }
+    }
+
     const res = await db.ticket.delete({
         where: {
             id : ticketId
