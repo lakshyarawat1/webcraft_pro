@@ -824,7 +824,8 @@ export const searchContacts = async (searchTerms : string) => {
             name: {
                 contains : searchTerms
             }
-        }
+        },
+        take: 10 // ⚡ Bolt Optimization: Limit autocomplete search results to prevent massive payloads on broad queries
     })
 
     return res;
