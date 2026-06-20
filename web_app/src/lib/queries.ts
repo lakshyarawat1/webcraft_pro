@@ -315,6 +315,7 @@ export const getNotificationAndUser = async (agencyId: string) => {
             orderBy: {
                 createdAt: 'desc'
             },
+            take: 50 // ⚡ Bolt Optimization: Limit notifications to prevent unbounded payload growth as history accumulates
         })
         return res;
     } catch (err) {

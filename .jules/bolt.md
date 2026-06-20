@@ -8,3 +8,7 @@
 ## 2024-05-16 - Prisma Include Fetching Unused Heavy Columns
 **Learning:** Using `include: { Relation: true }` in Prisma queries blindly fetches all columns of the relation. In tables with heavy text or JSON columns (like `FunnelPages` which has a `content` column storing full page JSON), this results in massively oversized payloads being loaded into application memory just to calculate a simple sum or display small fields like `name` and `visits`.
 **Action:** Always use a nested `select` within `include` blocks to only fetch the explicitly required fields from the relation when dealing with tables that have heavy columns.
+
+## 2024-06-20 - Unbounded History Feeds
+**Learning:** Fetching historical logs or feeds (like notifications) using `findMany` without bounds will cause performance to degrade over time as the database accumulates records, leading to unbounded payload growth and database execution delays.
+**Action:** Always apply a reasonable limit (e.g., `take: 50`) when querying chronological feeds or history logs using Prisma `findMany`.
