@@ -24,7 +24,6 @@ const PipelineValue = ({ subaccountId }: Props) => {
   >([]);
 
   const [selectedPipelineId, setselectedPipelineId] = useState("");
-  const [pipelineClosedValue, setPipelineClosedValue] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,25 +34,31 @@ const PipelineValue = ({ subaccountId }: Props) => {
     fetchData();
   }, [subaccountId]);
 
-  const totalPipelineValue = useMemo(() => {
+  // ⚡ Bolt Optimization: Calculate both total and closed values in a single pass without setting state inside useMemo
+  // This prevents unnecessary re-renders that occur when a state setter is called during the render phase
+  const { totalPipelineValue, pipelineClosedValue } = useMemo(() => {
     if (pipelines.length) {
       return (
         pipelines
           .find((pipeline) => pipeline.id === selectedPipelineId)
-          ?.Lane?.reduce((totalLanes, lane, currentLaneIndex, array) => {
-            const laneTicketsTotal = lane.Tickets.reduce(
-              (totalTickets, ticket) => totalTickets + Number(ticket?.value),
-              0
-            );
-            if (currentLaneIndex === array.length - 1) {
-              setPipelineClosedValue(laneTicketsTotal || 0);
-              return totalLanes;
-            }
-            return totalLanes + laneTicketsTotal;
-          }, 0) || 0
+          ?.Lane?.reduce(
+            (acc, lane, currentLaneIndex, array) => {
+              const laneTicketsTotal = lane.Tickets.reduce(
+                (totalTickets, ticket) => totalTickets + Number(ticket?.value),
+                0
+              );
+              if (currentLaneIndex === array.length - 1) {
+                acc.pipelineClosedValue = laneTicketsTotal || 0;
+              } else {
+                acc.totalPipelineValue += laneTicketsTotal;
+              }
+              return acc;
+            },
+            { totalPipelineValue: 0, pipelineClosedValue: 0 }
+          ) || { totalPipelineValue: 0, pipelineClosedValue: 0 }
       );
     }
-    return 0;
+    return { totalPipelineValue: 0, pipelineClosedValue: 0 };
   }, [selectedPipelineId, pipelines]);
 
   const pipelineRate = useMemo(
