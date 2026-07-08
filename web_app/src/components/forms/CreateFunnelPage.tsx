@@ -27,7 +27,6 @@ import { FunnelPage } from "@prisma/client";
 import { FunnelPageSchema } from "@/lib/types";
 import {
   deleteFunnelPage,
-  getFunnels,
   getFunnelPageCount,
   saveActivityLogsNotification,
   upsertFunnelPage,

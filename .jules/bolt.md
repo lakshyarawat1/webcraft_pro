@@ -7,3 +7,7 @@
 ## 2024-05-24 - [O(N*M) Rendering Anti-Patterns in Sidebar]
 **Learning:** Found an instance in `web_app/src/components/sidebar/MenuOptions.tsx` where an array `.find()` was nested inside a `.map()` during render, and another in `web_app/src/components/sidebar/index.tsx` where `.find()` was nested inside `.filter()`. These create O(N*M) time complexity during critical render paths. The `MenuOptions` loop actually contained a bug where the callback was missing a `return` statement, causing silent lookup failures, which the refactor inherently fixed.
 **Action:** When working with nested collections in render loops (like sidebar options or nested arrays), prioritize extracting the inner lookup into an O(1) Map or Set outside the component (or memoized) to avoid compounding render times.
+
+## 2024-07-08 - [Avoid fetching FunnelPages with Funnels unnecessarily]
+**Learning:** The `FunnelPage` model contains a `content` field which stores the entire JSON tree for the page builder. Fetching `FunnelPages` alongside `Funnels` using Prisma's `include` in list views (like the funnels dashboard) causes massive payload sizes and severe memory bloat because it eagerly loads the heavy JSON blobs for every page of every funnel.
+**Action:** Always omit `FunnelPages` from `db.funnel.findMany` queries unless specifically required (e.g., when viewing a specific funnel's details). If page counts are needed, use Prisma's `_count` instead of fetching the full relation.
