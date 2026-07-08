@@ -975,9 +975,10 @@ export const getFunnels = async (subAccountId: string) => {
         where: {
             subAccountId: subAccountId
         },
-        include: {
-            FunnelPages : true,
-        }
+        // ⚡ Bolt Optimization: Removed `include: { FunnelPages: true }` because the funnel
+        // dashboard table does not use the funnel pages data. Fetching all pages along
+        // with their heavy `content` field (which stores the entire JSON page builder data)
+        // caused massive memory consumption and slow query times as the funnel grows.
     })
 
     return funnels;
