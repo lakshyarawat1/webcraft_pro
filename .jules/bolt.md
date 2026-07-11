@@ -7,3 +7,6 @@
 ## 2024-05-24 - [O(N*M) Rendering Anti-Patterns in Sidebar]
 **Learning:** Found an instance in `web_app/src/components/sidebar/MenuOptions.tsx` where an array `.find()` was nested inside a `.map()` during render, and another in `web_app/src/components/sidebar/index.tsx` where `.find()` was nested inside `.filter()`. These create O(N*M) time complexity during critical render paths. The `MenuOptions` loop actually contained a bug where the callback was missing a `return` statement, causing silent lookup failures, which the refactor inherently fixed.
 **Action:** When working with nested collections in render loops (like sidebar options or nested arrays), prioritize extracting the inner lookup into an O(1) Map or Set outside the component (or memoized) to avoid compounding render times.
+## 2024-07-11 - [Extracting Intl.NumberFormat Instantiation]
+**Learning:** Instantiating `Intl.NumberFormat` inside loops or render paths is a significant, CPU-bound anti-pattern in V8/JS environments, repeatedly rebuilding costly locale settings and formatting rules on every render or map iteration.
+**Action:** Always move `Intl` object instantiations outside the function or component scope (or at least strictly memoize them) to reuse a single instance for formatting.
