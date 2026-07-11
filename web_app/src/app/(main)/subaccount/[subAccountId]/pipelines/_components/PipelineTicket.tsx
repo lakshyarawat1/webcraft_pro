@@ -51,6 +51,13 @@ type Props = {
   index: number;
 };
 
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat outside component
+// to avoid expensive recreation on each render and loop iteration.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 const PipelineTicket = ({
   allTickets,
   index,
@@ -223,10 +230,7 @@ const PipelineTicket = ({
                     </div>
                     <span className="text-sm font-bold">
                       {!!ticket.value &&
-                        new Intl.NumberFormat(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(+ticket.value)}
+                        currencyFormatter.format(+ticket.value)}
                     </span>
                   </CardFooter>
                   <DropdownMenuContent>

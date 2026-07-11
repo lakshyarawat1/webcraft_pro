@@ -44,6 +44,13 @@ interface PipelaneLaneProps {
   index: number;
 }
 
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat outside component
+// to avoid expensive recreation on each render and loop iteration.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 const PipelineLane: React.FC<PipelaneLaneProps> = ({
   setAllTickets,
   tickets,
@@ -55,11 +62,6 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
 }) => {
   const { setOpen } = useModal();
   const router = useRouter();
-
-  const amt = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-  });
 
   const laneAmt = useMemo(() => {
     console.log(tickets);
@@ -159,7 +161,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       </div>
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
-                          {amt.format(laneAmt)}
+                          {currencyFormatter.format(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />
