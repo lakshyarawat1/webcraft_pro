@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/lib/db";
+import { formatCurrency } from "@/lib/utils";
 import { SubAccount, Contact, Ticket } from "@prisma/client";
 import { format } from 'date-fns'
 import React from "react";
@@ -43,17 +44,13 @@ const page = async ({ params }: Props) => {
 
   const formatTotal = (tickets: Ticket[]) => {
     if (!tickets || !tickets.length) return "$0.00";
-    const amount = new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "USD",
-    });
 
     const laneAmt = tickets.reduce(
       (sum, ticket) => sum + (Number(ticket?.value) || 0),
       0
     );
 
-    return amount.format(laneAmt);
+    return formatCurrency(laneAmt);
   };
 
   return (
