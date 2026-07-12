@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { deleteLane, saveActivityLogsNotification } from "@/lib/queries";
+import { formatCurrency } from "@/lib/utils";
 import { LaneDetail, TicketWithTags } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { useModal } from "@/providers/model-provider";
@@ -55,11 +56,6 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
 }) => {
   const { setOpen } = useModal();
   const router = useRouter();
-
-  const amt = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-  });
 
   const laneAmt = useMemo(() => {
     console.log(tickets);
@@ -159,7 +155,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       </div>
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
-                          {amt.format(laneAmt)}
+                          {formatCurrency(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />
