@@ -34,36 +34,42 @@ const PipelineValue = ({ subaccountId }: Props) => {
     fetchData();
   }, [subaccountId]);
 
-  // ⚡ Bolt Optimization: Calculate both total and closed values in a single pass without setting state inside useMemo
-  // This prevents unnecessary re-renders that occur when a state setter is called during the render phase
-  const { totalPipelineValue, pipelineClosedValue } = useMemo(() => {
+  // ⚡ Bolt Optimization: Compute total and closed pipeline values in a single pass within useMemo.
+  // This removes a React performance anti-pattern where a state setter was called during render,
+  // preventing immediate unnecessary re-renders.
+  const pipelineInfo = useMemo(() => {
     if (pipelines.length) {
-      return (
-        pipelines
-          .find((pipeline) => pipeline.id === selectedPipelineId)
-          ?.Lane?.reduce(
-            (acc, lane, currentLaneIndex, array) => {
-              const laneTicketsTotal = lane.Tickets.reduce(
-                (totalTickets, ticket) => totalTickets + Number(ticket?.value),
-                0
-              );
-              if (currentLaneIndex === array.length - 1) {
-                acc.pipelineClosedValue = laneTicketsTotal || 0;
-              } else {
-                acc.totalPipelineValue += laneTicketsTotal;
-              }
-              return acc;
-            },
-            { totalPipelineValue: 0, pipelineClosedValue: 0 }
-          ) || { totalPipelineValue: 0, pipelineClosedValue: 0 }
-      );
+      const pipeline = pipelines.find((pipeline) => pipeline.id === selectedPipelineId);
+      if (pipeline && pipeline.Lane) {
+        let totalValue = 0;
+        let closedValue = 0;
+
+        pipeline.Lane.forEach((lane, currentLaneIndex, array) => {
+          const laneTicketsTotal = lane.Tickets.reduce(
+            (totalTickets, ticket) => totalTickets + Number(ticket?.value),
+            0
+          );
+
+          if (currentLaneIndex === array.length - 1) {
+            closedValue = laneTicketsTotal || 0;
+          } else {
+            totalValue += laneTicketsTotal;
+          }
+        });
+
+        return { totalPipelineValue: totalValue, pipelineClosedValue: closedValue };
+      }
     }
     return { totalPipelineValue: 0, pipelineClosedValue: 0 };
   }, [selectedPipelineId, pipelines]);
 
+  const { totalPipelineValue, pipelineClosedValue } = pipelineInfo;
+
   const pipelineRate = useMemo(
-    () =>
-      (pipelineClosedValue / (totalPipelineValue + pipelineClosedValue)) * 100,
+    () => {
+      if (totalPipelineValue + pipelineClosedValue === 0) return 0;
+      return (pipelineClosedValue / (totalPipelineValue + pipelineClosedValue)) * 100;
+    },
     [pipelineClosedValue, totalPipelineValue]
   );
 
