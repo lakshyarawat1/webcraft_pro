@@ -976,7 +976,20 @@ export const getFunnels = async (subAccountId: string) => {
             subAccountId: subAccountId
         },
         include: {
-            FunnelPages : true,
+            // ⚡ Bolt Optimization: Use a nested select to only fetch the required fields for FunnelPages, avoiding loading heavy content text into memory
+            FunnelPages: {
+                select: {
+                    id: true,
+                    name: true,
+                    pathName: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    visits: true,
+                    order: true,
+                    previewImage: true,
+                    funnelId: true,
+                }
+            }
         }
     })
 

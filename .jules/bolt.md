@@ -24,6 +24,9 @@
 ## 2026-06-22 - [React Render Anti-pattern]
 **Learning:** Calling a state setter inside a `useMemo` block causes side effects during the render phase, leading to immediate unnecessary re-renders in Next.js/React applications.
 **Action:** Always compute derived values directly within `useMemo` and return them (e.g. as an object) instead of triggering a state update from within the hook.
+## 2024-07-23 - [Optimization: Avoid fetching heavy text content on getFunnels]
+**Learning:** Found a performance bottleneck where querying funnels using Prisma's `include: { FunnelPages: true }` loaded heavy JSON/text `content` column data for all pages into memory unnecessarily, leading to huge payload size and massive latency hits.
+**Action:** Used nested `select` inside `include` (e.g. `include: { FunnelPages: { select: { id: true, name: true, ... } } }`) to pick only necessary fields instead of implicitly fetching everything when `content` isn't needed. Next time, always check if all fields in a large relationship are needed, specifically large string fields.
 ## 2024-05-24 - [O(N*M) Rendering Anti-Patterns in Sidebar]
 **Learning:** Found an instance in `web_app/src/components/sidebar/MenuOptions.tsx` where an array `.find()` was nested inside a `.map()` during render, and another in `web_app/src/components/sidebar/index.tsx` where `.find()` was nested inside `.filter()`. These create O(N*M) time complexity during critical render paths. The `MenuOptions` loop actually contained a bug where the callback was missing a `return` statement, causing silent lookup failures, which the refactor inherently fixed.
 **Action:** When working with nested collections in render loops (like sidebar options or nested arrays), prioritize extracting the inner lookup into an O(1) Map or Set outside the component (or memoized) to avoid compounding render times.
