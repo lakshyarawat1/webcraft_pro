@@ -34,6 +34,12 @@ import CustomModal from "@/components/global/CustomModal";
 import TicketForm from "@/components/forms/TicketForm";
 import PipelineTicket from "./PipelineTicket";
 
+// ⚡ Bolt: Cache Intl.NumberFormat outside component to prevent expensive re-instantiation on each render/loop iteration
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 interface PipelaneLaneProps {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
   allTickets: TicketWithTags;
@@ -55,11 +61,6 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
 }) => {
   const { setOpen } = useModal();
   const router = useRouter();
-
-  const amt = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-  });
 
   const laneAmt = useMemo(() => {
     console.log(tickets);
@@ -159,7 +160,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       </div>
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
-                          {amt.format(laneAmt)}
+                          {currencyFormatter.format(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />
