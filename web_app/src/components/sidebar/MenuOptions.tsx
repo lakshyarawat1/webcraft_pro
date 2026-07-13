@@ -39,6 +39,9 @@ type Props = {
   id: string;
 };
 
+// ⚡ Bolt Optimization: Pre-compute icon map outside component for O(1) rendering lookups
+const iconMap = new Map(icons.map(icon => [icon.value, icon.path]));
+
 const MenuOptions = ({
   defaultOpen,
   subAccounts,
@@ -261,14 +264,10 @@ const MenuOptions = ({
                 <CommandEmpty>No Results Found</CommandEmpty>
                 <CommandGroup className="overflow-visible">
                   {sideBarOptions.map((sidebaroption) => {
-                    let val;
-                    const results = icons.find((icon) => {
-                      icon.value === sidebaroption.icon
-                    })
+                    // ⚡ Bolt Optimization: Replace O(N*M) nested `.find()` with O(1) map lookup
+                    const IconComponent = iconMap.get(sidebaroption.icon);
+                    const val = IconComponent ? <IconComponent /> : null;
 
-                    if (results) {
-                      val = <results.path />
-                    }
                     return (
                       <CommandItem key={sidebaroption.id} className="md:w-[320px] w-full">
                         <Link href={sidebaroption.link} className="hover:bg-transparent rounded-md flex items-center gap-2 transition-all md:w-full w-[320px]">

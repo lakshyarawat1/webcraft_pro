@@ -315,6 +315,7 @@ export const getNotificationAndUser = async (agencyId: string) => {
             orderBy: {
                 createdAt: 'desc'
             },
+            take: 50, // ⚡ Bolt Optimization: Limit notifications to prevent massive payloads and slow render times as history grows
         })
         return res;
     } catch (err) {
@@ -824,7 +825,8 @@ export const searchContacts = async (searchTerms : string) => {
             name: {
                 contains : searchTerms
             }
-        }
+        },
+        take: 10 // ⚡ Bolt Optimization: Limit autocomplete search results to prevent massive payloads on broad queries
     })
 
     return res;
