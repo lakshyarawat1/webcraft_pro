@@ -43,6 +43,12 @@ import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 import { Draggable } from "react-beautiful-dnd";
 
+// ⚡ Bolt: Cache Intl.NumberFormat outside component to prevent expensive re-instantiation on each render/loop iteration
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 type Props = {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
   ticket: TicketWithTags[0];
@@ -223,10 +229,7 @@ const PipelineTicket = ({
                     </div>
                     <span className="text-sm font-bold">
                       {!!ticket.value &&
-                        new Intl.NumberFormat(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(+ticket.value)}
+                        currencyFormatter.format(+ticket.value)}
                     </span>
                   </CardFooter>
                   <DropdownMenuContent>
