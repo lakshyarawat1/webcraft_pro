@@ -66,6 +66,8 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
     },
     include: {
       FunnelPages: {
+        // ⚡ Bolt Optimization: Only select necessary fields for the chart.
+        // Avoids fetching the heavy `content` JSON string column into memory.
         select: {
           id: true,
           name: true,
