@@ -42,6 +42,7 @@ import { Contact2, Edit, MoreHorizontalIcon, Trash, User2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 import { Draggable } from "react-beautiful-dnd";
+import { formatCurrency } from "@/lib/utils";
 
 type Props = {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
@@ -222,11 +223,7 @@ const PipelineTicket = ({
                       </div>
                     </div>
                     <span className="text-sm font-bold">
-                      {!!ticket.value &&
-                        new Intl.NumberFormat(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(+ticket.value)}
+                      {!!ticket.value && formatCurrency(+ticket.value)}
                     </span>
                   </CardFooter>
                   <DropdownMenuContent>
