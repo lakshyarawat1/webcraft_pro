@@ -14,6 +14,13 @@ type Props = {
   };
 };
 
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat once at module scope.
+// Creating these objects inside render loops or maps is expensive in JS engines.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 const page = async ({ params }: Props) => {
   type SubAccountWithContacts = SubAccount & {
     Contact: (Contact & { Ticket: Ticket[] })[];
@@ -43,17 +50,13 @@ const page = async ({ params }: Props) => {
 
   const formatTotal = (tickets: Ticket[]) => {
     if (!tickets || !tickets.length) return "$0.00";
-    const amount = new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "USD",
-    });
 
     const laneAmt = tickets.reduce(
       (sum, ticket) => sum + (Number(ticket?.value) || 0),
       0
     );
 
-    return amount.format(laneAmt);
+    return currencyFormatter.format(laneAmt);
   };
 
   return (
