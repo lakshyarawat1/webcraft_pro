@@ -8,6 +8,11 @@ import { format } from 'date-fns'
 import React from "react";
 import CreateContactButton from "./_components/CreateContactButton";
 
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 type Props = {
   params: {
     subAccountId: string;
@@ -43,17 +48,13 @@ const page = async ({ params }: Props) => {
 
   const formatTotal = (tickets: Ticket[]) => {
     if (!tickets || !tickets.length) return "$0.00";
-    const amount = new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "USD",
-    });
 
     const laneAmt = tickets.reduce(
       (sum, ticket) => sum + (Number(ticket?.value) || 0),
       0
     );
 
-    return amount.format(laneAmt);
+    return currencyFormat.format(laneAmt);
   };
 
   return (
