@@ -38,3 +38,8 @@ export function hexToString(hex : string) {
   // Remove any padding zeros if they were added
   return str.replace(/\0+$/, '');
 }
+
+export const formatCurrency = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
