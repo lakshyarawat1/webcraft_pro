@@ -51,6 +51,14 @@ type Props = {
   index: number;
 };
 
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat outside the render loop.
+// Instantiating Intl objects is computationally expensive in JS engines.
+// Moving this out prevents creating a new formatter instance for every ticket on every render.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 const PipelineTicket = ({
   allTickets,
   index,
@@ -222,11 +230,7 @@ const PipelineTicket = ({
                       </div>
                     </div>
                     <span className="text-sm font-bold">
-                      {!!ticket.value &&
-                        new Intl.NumberFormat(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(+ticket.value)}
+                      {!!ticket.value && currencyFormatter.format(+ticket.value)}
                     </span>
                   </CardFooter>
                   <DropdownMenuContent>
