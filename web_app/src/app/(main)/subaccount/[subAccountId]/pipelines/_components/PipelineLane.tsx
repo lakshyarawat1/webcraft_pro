@@ -30,6 +30,7 @@ import { Edit, MoreVertical, PlusCircleIcon, Trash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction, useMemo } from "react";
 // import PipelineTicket from './pipeline-ticket'
+import { formatCurrency } from "@/lib/utils";
 import CustomModal from "@/components/global/CustomModal";
 import TicketForm from "@/components/forms/TicketForm";
 import PipelineTicket from "./PipelineTicket";
@@ -55,11 +56,6 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
 }) => {
   const { setOpen } = useModal();
   const router = useRouter();
-
-  const amt = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-  });
 
   const laneAmt = useMemo(() => {
     console.log(tickets);
@@ -159,7 +155,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       </div>
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
-                          {amt.format(laneAmt)}
+                          {formatCurrency(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />
