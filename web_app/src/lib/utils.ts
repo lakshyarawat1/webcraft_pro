@@ -4,6 +4,17 @@ import mongoose from "mongoose"
 import { createHash } from "crypto"
 
 
+// Cache the Intl.NumberFormat instance to prevent expensive re-instantiations
+// during render loops or frequent utility calls.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
+export function formatCurrency(amount: number) {
+  return currencyFormatter.format(amount);
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
