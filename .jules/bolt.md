@@ -30,3 +30,6 @@
 ## 2024-05-24 - [O(N*M) Rendering Anti-Patterns in Sidebar]
 **Learning:** Found an instance in `web_app/src/components/sidebar/MenuOptions.tsx` where an array `.find()` was nested inside a `.map()` during render, and another in `web_app/src/components/sidebar/index.tsx` where `.find()` was nested inside `.filter()`. These create O(N*M) time complexity during critical render paths. The `MenuOptions` loop actually contained a bug where the callback was missing a `return` statement, causing silent lookup failures, which the refactor inherently fixed.
 **Action:** When working with nested collections in render loops (like sidebar options or nested arrays), prioritize extracting the inner lookup into an O(1) Map or Set outside the component (or memoized) to avoid compounding render times.
+## 2024-07-24 - [JavaScript Performance Pattern: Caching Intl instances]
+**Learning:** Instantiating `Intl` objects (like `Intl.NumberFormat`) is computationally expensive in JS engines (like V8). Doing this inline inside `.map`, `.reduce`, or React render loops creates an unnecessary performance drag.
+**Action:** Always create a single shared `Intl` instance outside of the execution block (e.g. at module level like `formatCurrency` utility) and reuse it to significantly speed up formatting.
