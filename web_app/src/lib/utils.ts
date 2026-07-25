@@ -38,3 +38,14 @@ export function hexToString(hex : string) {
   // Remove any padding zeros if they were added
   return str.replace(/\0+$/, '');
 }
+// ⚡ Bolt Optimization: Cache Intl.NumberFormat instantiation
+// Instantiating Intl objects (like Intl.NumberFormat) is computationally expensive in V8.
+// Creating a single cached instance here prevents re-instantiating it inside loops or React render functions.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
+export function formatCurrency(amount: number | string) {
+  return currencyFormatter.format(Number(amount));
+}
