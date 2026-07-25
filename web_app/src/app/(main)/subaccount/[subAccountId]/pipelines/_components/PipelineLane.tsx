@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { deleteLane, saveActivityLogsNotification } from "@/lib/queries";
 import { LaneDetail, TicketWithTags } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
 import { useModal } from "@/providers/model-provider";
 import { Draggable, Droppable } from "react-beautiful-dnd";
 import { Edit, MoreVertical, PlusCircleIcon, Trash } from "lucide-react";
@@ -56,13 +56,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
   const { setOpen } = useModal();
   const router = useRouter();
 
-  const amt = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency: "USD",
-  });
-
   const laneAmt = useMemo(() => {
-    console.log(tickets);
     return tickets.reduce(
       (sum, ticket) => sum + (Number(ticket?.value) || 0),
       0
@@ -159,7 +153,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       </div>
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
-                          {amt.format(laneAmt)}
+                      {formatCurrency(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />
