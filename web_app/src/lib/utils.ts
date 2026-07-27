@@ -8,6 +8,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// ⚡ Bolt Optimization: Cache Intl.NumberFormat to avoid expensive re-instantiations
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
+export function formatCurrency(amount: number) {
+  return currencyFormatter.format(amount);
+}
+
 
 export function generateRandomUUID() {
   return new mongoose.Types.ObjectId().toHexString();

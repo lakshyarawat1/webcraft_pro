@@ -33,3 +33,6 @@
 ## 2026-07-10 - [Cache Intl.NumberFormat Instantiation]
 **Learning:** Instantiating `Intl` objects (like `Intl.NumberFormat`) is computationally expensive in JS engines (like V8). Placing them inside list render mapping functions forces re-instantiation per item, leading to unnecessary CPU overhead during rendering.
 **Action:** Always instantiate `Intl` formatter objects outside the component or loop scope so the single instance can be reused across all format calls.
+## 2024-07-28 - [Cache Intl.NumberFormat to avoid expensive re-instantiations]
+**Learning:** Found multiple instances where `Intl.NumberFormat` was being instantiated inside component loops (like mapping over contacts) and component render functions. Instantiating `Intl` objects is computationally expensive in JS engines (like V8) and creates unnecessary CPU overhead during rendering.
+**Action:** Centralized a `formatCurrency` utility function with a cached `Intl.NumberFormat` instance in `utils.ts` and refactored components (`contacts/page.tsx`, `PipelineLane.tsx`, `PipelineTicket.tsx`) to use the single instance instead of creating their own.
