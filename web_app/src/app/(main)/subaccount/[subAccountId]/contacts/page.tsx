@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { db } from "@/lib/db";
+import { formatCurrency } from "@/lib/utils";
 import { SubAccount, Contact, Ticket } from "@prisma/client";
 import { format } from 'date-fns'
 import React from "react";
@@ -13,13 +14,6 @@ type Props = {
     subAccountId: string;
   };
 };
-
-// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat outside the render loop.
-// Instantiating Intl objects is computationally expensive, especially inside a map loop where it's called twice per contact.
-const currencyFormatter = new Intl.NumberFormat(undefined, {
-  style: "currency",
-  currency: "USD",
-});
 
 const page = async ({ params }: Props) => {
   type SubAccountWithContacts = SubAccount & {
@@ -56,7 +50,7 @@ const page = async ({ params }: Props) => {
       0
     );
 
-    return currencyFormatter.format(laneAmt);
+    return formatCurrency(laneAmt);
   };
 
   return (
