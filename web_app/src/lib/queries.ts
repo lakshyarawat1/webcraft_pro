@@ -1002,7 +1002,19 @@ export const getFunnel = async (funnelId: string) => {
             id : funnelId
         },
         include: {
+            // ⚡ Bolt Optimization: Use a nested select to only fetch the required fields for FunnelPages, avoiding loading heavy content text into memory
             FunnelPages: {
+                select: {
+                    id: true,
+                    name: true,
+                    pathName: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    visits: true,
+                    order: true,
+                    previewImage: true,
+                    funnelId: true,
+                },
                 orderBy: {
                     order : 'asc'
                 }
