@@ -44,6 +44,11 @@ import React, { Dispatch, SetStateAction } from "react";
 import { Draggable } from "react-beautiful-dnd";
 import { formatCurrency } from "@/lib/utils";
 
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 type Props = {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
   ticket: TicketWithTags[0];

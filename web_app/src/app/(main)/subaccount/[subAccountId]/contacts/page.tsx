@@ -9,11 +9,23 @@ import React from "react";
 import CreateContactButton from "./_components/CreateContactButton";
 import { formatCurrency } from "@/lib/utils";
 
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 type Props = {
   params: {
     subAccountId: string;
   };
 };
+
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat outside the render loop.
+// Instantiating Intl objects is computationally expensive, especially inside a map loop where it's called twice per contact.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 const page = async ({ params }: Props) => {
   type SubAccountWithContacts = SubAccount & {

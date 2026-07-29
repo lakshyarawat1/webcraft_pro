@@ -35,6 +35,11 @@ import TicketForm from "@/components/forms/TicketForm";
 import PipelineTicket from "./PipelineTicket";
 import { formatCurrency } from "@/lib/utils";
 
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 interface PipelaneLaneProps {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
   allTickets: TicketWithTags;
