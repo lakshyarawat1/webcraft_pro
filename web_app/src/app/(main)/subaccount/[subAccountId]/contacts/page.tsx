@@ -20,8 +20,8 @@ type Props = {
   };
 };
 
-// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat outside the render loop.
-// Instantiating Intl objects is computationally expensive, especially inside a map loop where it's called twice per contact.
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat once at module scope.
+// Creating these objects inside render loops or maps is expensive in JS engines.
 const currencyFormatter = new Intl.NumberFormat(undefined, {
   style: "currency",
   currency: "USD",
@@ -62,7 +62,7 @@ const page = async ({ params }: Props) => {
       0
     );
 
-    return formatCurrency(laneAmt);
+    return currencyFormatter.format(laneAmt);
   };
 
   return (

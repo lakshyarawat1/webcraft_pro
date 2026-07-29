@@ -57,6 +57,13 @@ type Props = {
   index: number;
 };
 
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat once at module scope.
+// Creating these objects inside render loops or maps is expensive in JS engines.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 const PipelineTicket = ({
   allTickets,
   index,
@@ -228,7 +235,8 @@ const PipelineTicket = ({
                       </div>
                     </div>
                     <span className="text-sm font-bold">
-                      {!!ticket.value && formatCurrency(+ticket.value)}
+                      {!!ticket.value &&
+                        currencyFormatter.format(+ticket.value)}
                     </span>
                   </CardFooter>
                   <DropdownMenuContent>

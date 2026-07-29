@@ -50,6 +50,13 @@ interface PipelaneLaneProps {
   index: number;
 }
 
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat once at module scope.
+// Creating these objects inside render loops or maps is expensive in JS engines.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 const PipelineLane: React.FC<PipelaneLaneProps> = ({
   setAllTickets,
   tickets,
@@ -160,7 +167,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       </div>
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
-                          {formatCurrency(laneAmt)}
+                      {currencyFormatter.format(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />
