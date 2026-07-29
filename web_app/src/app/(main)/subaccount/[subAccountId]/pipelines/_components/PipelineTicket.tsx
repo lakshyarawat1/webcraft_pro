@@ -42,6 +42,12 @@ import { Contact2, Edit, MoreHorizontalIcon, Trash, User2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 import { Draggable } from "react-beautiful-dnd";
+import { formatCurrency } from "@/lib/utils";
+
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 type Props = {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;

@@ -33,6 +33,12 @@ import React, { Dispatch, SetStateAction, useMemo } from "react";
 import CustomModal from "@/components/global/CustomModal";
 import TicketForm from "@/components/forms/TicketForm";
 import PipelineTicket from "./PipelineTicket";
+import { formatCurrency } from "@/lib/utils";
+
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 interface PipelaneLaneProps {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
