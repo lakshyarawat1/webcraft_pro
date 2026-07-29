@@ -7,6 +7,7 @@ import { SubAccount, Contact, Ticket } from "@prisma/client";
 import { format } from 'date-fns'
 import React from "react";
 import CreateContactButton from "./_components/CreateContactButton";
+import { formatCurrency } from "@/lib/utils";
 
 const currencyFormat = new Intl.NumberFormat(undefined, {
   style: "currency",
@@ -61,8 +62,7 @@ const page = async ({ params }: Props) => {
       0
     );
 
-    return currencyFormat.format(laneAmt);
-    return currencyFormatter.format(laneAmt);
+    return formatCurrency(laneAmt);
   };
 
   return (

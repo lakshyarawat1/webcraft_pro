@@ -33,6 +33,7 @@ import React, { Dispatch, SetStateAction, useMemo } from "react";
 import CustomModal from "@/components/global/CustomModal";
 import TicketForm from "@/components/forms/TicketForm";
 import PipelineTicket from "./PipelineTicket";
+import { formatCurrency } from "@/lib/utils";
 
 const currencyFormat = new Intl.NumberFormat(undefined, {
   style: "currency",
@@ -159,7 +160,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       </div>
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
-                          {currencyFormat.format(laneAmt)}
+                          {formatCurrency(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />

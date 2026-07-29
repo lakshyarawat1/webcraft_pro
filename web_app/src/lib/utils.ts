@@ -8,6 +8,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
+export function formatCurrency(amount: number) {
+  return currencyFormatter.format(amount);
+}
+
 
 export function generateRandomUUID() {
   return new mongoose.Types.ObjectId().toHexString();
