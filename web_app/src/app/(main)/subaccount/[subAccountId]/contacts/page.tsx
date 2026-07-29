@@ -19,6 +19,13 @@ type Props = {
   };
 };
 
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat outside the render loop.
+// Instantiating Intl objects is computationally expensive, especially inside a map loop where it's called twice per contact.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 const page = async ({ params }: Props) => {
   type SubAccountWithContacts = SubAccount & {
     Contact: (Contact & { Ticket: Ticket[] })[];
@@ -55,6 +62,7 @@ const page = async ({ params }: Props) => {
     );
 
     return currencyFormat.format(laneAmt);
+    return currencyFormatter.format(laneAmt);
   };
 
   return (

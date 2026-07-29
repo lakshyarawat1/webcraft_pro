@@ -33,3 +33,6 @@
 ## 2024-07-18 - [Optimize Intl.NumberFormat Instantiation]
 **Learning:** Instantiating `Intl` objects (such as `Intl.NumberFormat`) is computationally expensive in JS engines. Avoid instantiating them inside loops or React render functions.
 **Action:** Always look for `Intl` instantiations inside loops or render functions. Declare them outside the component or function scope to reuse a single instance.
+## 2026-07-10 - [Cache Intl.NumberFormat Instantiation]
+**Learning:** Instantiating `Intl` objects (like `Intl.NumberFormat`) is computationally expensive in JS engines (like V8). Placing them inside list render mapping functions forces re-instantiation per item, leading to unnecessary CPU overhead during rendering.
+**Action:** Always instantiate `Intl` formatter objects outside the component or loop scope so the single instance can be reused across all format calls.
