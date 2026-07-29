@@ -37,6 +37,7 @@ import {
 import { toast } from "@/components/ui/use-toast";
 import { deleteTicket, saveActivityLogsNotification } from "@/lib/queries";
 import { TicketWithTags } from "@/lib/types";
+import { formatCurrency } from "@/lib/utils";
 import { useModal } from "@/providers/model-provider";
 import { Contact2, Edit, MoreHorizontalIcon, Trash, User2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -236,6 +237,7 @@ const PipelineTicket = ({
                     </div>
                     <span className="text-sm font-bold">
                       {!!ticket.value &&
+                        formatCurrency.format(+ticket.value)}
                         currencyFormatter.format(+ticket.value)}
                     </span>
                   </CardFooter>

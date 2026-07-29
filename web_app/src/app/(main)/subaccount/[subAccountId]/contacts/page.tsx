@@ -6,6 +6,7 @@ import { db } from "@/lib/db";
 import { SubAccount, Contact, Ticket } from "@prisma/client";
 import { format } from 'date-fns'
 import React from "react";
+import { formatCurrency } from "@/lib/utils";
 import CreateContactButton from "./_components/CreateContactButton";
 import { formatCurrency } from "@/lib/utils";
 
@@ -62,6 +63,7 @@ const page = async ({ params }: Props) => {
       0
     );
 
+    return formatCurrency.format(laneAmt);
     return currencyFormatter.format(laneAmt);
   };
 
