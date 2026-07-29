@@ -38,3 +38,13 @@ export function hexToString(hex : string) {
   // Remove any padding zeros if they were added
   return str.replace(/\0+$/, '');
 }
+
+// ⚡ Bolt Optimization: Cache Intl.NumberFormat to avoid expensive instantiations
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
+export function formatCurrency(value: number) {
+  return currencyFormatter.format(value);
+}

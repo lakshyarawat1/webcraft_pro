@@ -33,3 +33,7 @@
 ## 2026-07-10 - [Cache Intl.NumberFormat Instantiation]
 **Learning:** Instantiating `Intl` objects (like `Intl.NumberFormat`) is computationally expensive in JS engines (like V8). Placing them inside list render mapping functions forces re-instantiation per item, leading to unnecessary CPU overhead during rendering.
 **Action:** Always instantiate `Intl` formatter objects outside the component or loop scope so the single instance can be reused across all format calls.
+
+## 2024-11-20 - [Avoid Expensive Object Instantiations in Render/Loops]
+**Learning:** Instantiating `Intl` objects (like `Intl.NumberFormat`) is computationally expensive in JS engines. Doing this inside React render functions or loops (e.g. mapping over arrays) can cause significant performance bottlenecks as the application scales.
+**Action:** Always instantiate `Intl` objects outside the render loop or component scope. For common formats like USD currency, centralize the instance in a utility file (`lib/utils.ts`) and export a formatting function to be reused across the application.
