@@ -43,6 +43,11 @@ import { useRouter } from "next/navigation";
 import React, { Dispatch, SetStateAction } from "react";
 import { Draggable } from "react-beautiful-dnd";
 
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 type Props = {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
   ticket: TicketWithTags[0];
@@ -222,11 +227,7 @@ const PipelineTicket = ({
                       </div>
                     </div>
                     <span className="text-sm font-bold">
-                      {!!ticket.value &&
-                        new Intl.NumberFormat(undefined, {
-                          style: "currency",
-                          currency: "USD",
-                        }).format(+ticket.value)}
+                      {!!ticket.value && currencyFormat.format(+ticket.value)}
                     </span>
                   </CardFooter>
                   <DropdownMenuContent>

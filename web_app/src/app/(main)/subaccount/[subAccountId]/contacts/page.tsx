@@ -8,6 +8,11 @@ import { format } from 'date-fns'
 import React from "react";
 import CreateContactButton from "./_components/CreateContactButton";
 
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
+
 type Props = {
   params: {
     subAccountId: string;
@@ -56,6 +61,7 @@ const page = async ({ params }: Props) => {
       0
     );
 
+    return currencyFormat.format(laneAmt);
     return currencyFormatter.format(laneAmt);
   };
 
