@@ -8,12 +8,25 @@ import { format } from 'date-fns'
 import React from "react";
 import { formatCurrency } from "@/lib/utils";
 import CreateContactButton from "./_components/CreateContactButton";
+import { formatCurrency } from "@/lib/utils";
+
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 type Props = {
   params: {
     subAccountId: string;
   };
 };
+
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat once at module scope.
+// Creating these objects inside render loops or maps is expensive in JS engines.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 const page = async ({ params }: Props) => {
   type SubAccountWithContacts = SubAccount & {
@@ -51,6 +64,7 @@ const page = async ({ params }: Props) => {
     );
 
     return formatCurrency.format(laneAmt);
+    return currencyFormatter.format(laneAmt);
   };
 
   return (

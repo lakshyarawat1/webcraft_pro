@@ -33,3 +33,6 @@
 ## 2024-07-19 - [Repeated Intl Object Instantiation in Render Loop]
 **Learning:** Instantiating `Intl.NumberFormat` inside React render functions or loops is a performance bottleneck in V8/Next.js due to parsing and initialization overhead, especially when rendering lists (like pipeline tickets).
 **Action:** Always extract `Intl` object instantiations to a global utility constant (e.g., in `lib/utils.ts`) to ensure they are created only once per client/server process and reused across the application.
+## 2024-08-01 - [Avoid Intl object instantiations in render loops]
+**Learning:** Found multiple instances where `Intl.NumberFormat` was being instantiated inside functional components (like `PipelineLane` and `PipelineTicket`) and render loops (like the contacts page mapping over rows). JS engines like V8 take a relatively significant performance hit when initializing `Intl` objects, so repeatedly recreating them inside render cycles adds hidden overhead, especially on pages with many elements (like dozens of tickets in a pipeline).
+**Action:** Always instantiate `Intl` formatters (like `Intl.NumberFormat` and `Intl.DateTimeFormat`) once at the module scope outside of React components and reuse the single instance to format values during renders.

@@ -33,6 +33,12 @@ import React, { Dispatch, SetStateAction, useMemo } from "react";
 import CustomModal from "@/components/global/CustomModal";
 import TicketForm from "@/components/forms/TicketForm";
 import PipelineTicket from "./PipelineTicket";
+import { formatCurrency } from "@/lib/utils";
+
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 interface PipelaneLaneProps {
   setAllTickets: Dispatch<SetStateAction<TicketWithTags>>;
@@ -43,6 +49,13 @@ interface PipelaneLaneProps {
   subAccountId: string;
   index: number;
 }
+
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat once at module scope.
+// Creating these objects inside render loops or maps is expensive in JS engines.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 const PipelineLane: React.FC<PipelaneLaneProps> = ({
   setAllTickets,
@@ -155,6 +168,7 @@ const PipelineLane: React.FC<PipelaneLaneProps> = ({
                       <div className="flex items-center flex-row">
                         <Badge className="bg-white text-black">
                           {formatCurrency.format(laneAmt)}
+                      {currencyFormatter.format(laneAmt)}
                         </Badge>
                         <DropdownMenuTrigger>
                           <MoreVertical className="text-muted-foreground cursor-pointer" />
