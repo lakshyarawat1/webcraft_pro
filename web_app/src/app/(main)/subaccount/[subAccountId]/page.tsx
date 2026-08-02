@@ -59,12 +59,21 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
 
   if (!subaccountDetails) return;
 
+  // ⚡ Bolt Optimization: Use a nested select to only fetch the required fields for FunnelPages, avoiding loading heavy content text into memory
   const funnels = await db.funnel.findMany({
     where: {
       subAccountId: params.subAccountId,
     },
     include: {
-      FunnelPages: true,
+      FunnelPages: {
+        // ⚡ Bolt Optimization: Only select necessary fields for the chart.
+        // Avoids fetching the heavy `content` JSON string column into memory.
+        select: {
+          id: true,
+          name: true,
+          visits: true,
+        },
+      },
     },
   });
 

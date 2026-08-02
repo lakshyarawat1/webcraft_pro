@@ -6,13 +6,27 @@ import { db } from "@/lib/db";
 import { SubAccount, Contact, Ticket } from "@prisma/client";
 import { format } from 'date-fns'
 import React from "react";
+import { formatCurrency } from "@/lib/utils";
 import CreateContactButton from "./_components/CreateContactButton";
+import { formatCurrency } from "@/lib/utils";
+
+const currencyFormat = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 type Props = {
   params: {
     subAccountId: string;
   };
 };
+
+// ⚡ Bolt Optimization: Instantiate Intl.NumberFormat once at module scope.
+// Creating these objects inside render loops or maps is expensive in JS engines.
+const currencyFormatter = new Intl.NumberFormat(undefined, {
+  style: "currency",
+  currency: "USD",
+});
 
 const page = async ({ params }: Props) => {
   type SubAccountWithContacts = SubAccount & {
@@ -43,17 +57,14 @@ const page = async ({ params }: Props) => {
 
   const formatTotal = (tickets: Ticket[]) => {
     if (!tickets || !tickets.length) return "$0.00";
-    const amount = new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: "USD",
-    });
 
     const laneAmt = tickets.reduce(
       (sum, ticket) => sum + (Number(ticket?.value) || 0),
       0
     );
 
-    return amount.format(laneAmt);
+    return formatCurrency.format(laneAmt);
+    return currencyFormatter.format(laneAmt);
   };
 
   return (
