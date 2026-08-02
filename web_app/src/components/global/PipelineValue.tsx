@@ -24,7 +24,6 @@ const PipelineValue = ({ subaccountId }: Props) => {
   >([]);
 
   const [selectedPipelineId, setselectedPipelineId] = useState("");
-  const [pipelineClosedValue, setPipelineClosedValue] = useState(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,30 +34,42 @@ const PipelineValue = ({ subaccountId }: Props) => {
     fetchData();
   }, [subaccountId]);
 
-  const totalPipelineValue = useMemo(() => {
+  // ⚡ Bolt Optimization: Compute total and closed pipeline values in a single pass within useMemo.
+  // This removes a React performance anti-pattern where a state setter was called during render,
+  // preventing immediate unnecessary re-renders.
+  const pipelineInfo = useMemo(() => {
     if (pipelines.length) {
-      return (
-        pipelines
-          .find((pipeline) => pipeline.id === selectedPipelineId)
-          ?.Lane?.reduce((totalLanes, lane, currentLaneIndex, array) => {
-            const laneTicketsTotal = lane.Tickets.reduce(
-              (totalTickets, ticket) => totalTickets + Number(ticket?.value),
-              0
-            );
-            if (currentLaneIndex === array.length - 1) {
-              setPipelineClosedValue(laneTicketsTotal || 0);
-              return totalLanes;
-            }
-            return totalLanes + laneTicketsTotal;
-          }, 0) || 0
-      );
+      const pipeline = pipelines.find((pipeline) => pipeline.id === selectedPipelineId);
+      if (pipeline && pipeline.Lane) {
+        let totalValue = 0;
+        let closedValue = 0;
+
+        pipeline.Lane.forEach((lane, currentLaneIndex, array) => {
+          const laneTicketsTotal = lane.Tickets.reduce(
+            (totalTickets, ticket) => totalTickets + Number(ticket?.value),
+            0
+          );
+
+          if (currentLaneIndex === array.length - 1) {
+            closedValue = laneTicketsTotal || 0;
+          } else {
+            totalValue += laneTicketsTotal;
+          }
+        });
+
+        return { totalPipelineValue: totalValue, pipelineClosedValue: closedValue };
+      }
     }
-    return 0;
+    return { totalPipelineValue: 0, pipelineClosedValue: 0 };
   }, [selectedPipelineId, pipelines]);
 
+  const { totalPipelineValue, pipelineClosedValue } = pipelineInfo;
+
   const pipelineRate = useMemo(
-    () =>
-      (pipelineClosedValue / (totalPipelineValue + pipelineClosedValue)) * 100,
+    () => {
+      if (totalPipelineValue + pipelineClosedValue === 0) return 0;
+      return (pipelineClosedValue / (totalPipelineValue + pipelineClosedValue)) * 100;
+    },
     [pipelineClosedValue, totalPipelineValue]
   );
 
