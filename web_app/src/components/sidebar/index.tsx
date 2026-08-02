@@ -16,10 +16,12 @@ const Sidebar = async ({ id, type }: Props) => {
 
   if (!user.agency) return;
 
-  const details =
-    type === "agency"
-      ? user?.agency
-      : user?.agency.subAccount.find((subaccount) => subaccount.id === id);
+  // ⚡ Bolt Optimization: Cache the active subAccount to avoid O(N) array search 3 separate times
+  const currentSubAccount = type === "subaccount"
+    ? user.agency.subAccount.find((subaccount) => subaccount.id === id)
+    : null;
+
+  const details = type === "agency" ? user?.agency : currentSubAccount;
 
   const isWhiteLabelledAgency = user.agency.whiteLabel;
   if (!details) return;
@@ -27,24 +29,23 @@ const Sidebar = async ({ id, type }: Props) => {
   let SidebarLogo = user.agency.agencyLogo || "/assets/plura-logo.svg";
 
   if (!isWhiteLabelledAgency) {
-    if (type === "subaccount") {
-      SidebarLogo =
-        user?.agency.subAccount.find((subaccount) => subaccount.id === id)
-          ?.subAccountLogo || user.agency.agencyLogo;
+    if (type === "subaccount" && currentSubAccount) {
+      SidebarLogo = currentSubAccount.subAccountLogo || user.agency.agencyLogo;
     }
   }
 
   const sidebarOptions =
     type === "agency"
       ? user.agency.SideBarOption || []
-      : user.agency.subAccount.find((subaccount) => subaccount.id === id)
-          ?.SidebarOption || [];
+      : currentSubAccount?.SidebarOption || [];
 
-  const subAccount = user.agency.subAccount.filter((subAccount) =>
-    user.Permissions.find(
-      (permission) =>
-        permission.subAccountId === subAccount.id && permission.access
-    )
+  // ⚡ Bolt Optimization: Replace O(N*M) nested loop (filter + find) with O(N+M) Set lookup
+  const permissionMap = new Set(
+    user.Permissions.filter((p) => p.access).map((p) => p.subAccountId)
+  );
+
+  const subAccount = user.agency.subAccount.filter((subAcc) =>
+    permissionMap.has(subAcc.id)
   );
 
   return (

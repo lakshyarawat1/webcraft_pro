@@ -315,6 +315,7 @@ export const getNotificationAndUser = async (agencyId: string) => {
             orderBy: {
                 createdAt: 'desc'
             },
+            take: 50 // ⚡ Bolt Optimization: Limit notifications to prevent unbounded payload growth as history accumulates
         })
         return res;
     } catch (err) {
@@ -416,6 +417,15 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
                 },
                 ],
             },
+        }
+    })
+    return res;
+}
+
+export const getFunnelPageCount = async (funnelId: string) => {
+    const res = await db.funnelPage.count({
+        where: {
+            funnelId
         }
     })
     return res;
@@ -717,13 +727,14 @@ export const upsertLane = async (lane : Prisma.LaneUncheckedCreateInput) => {
     let order: number = 0;
 
     if (!lane.order) {
-        const lanes = await db.lane.findMany({
+        // Optimize: use count instead of fetching all records to memory
+        const lanesLength = await db.lane.count({
             where: {
                 pipelineId: lane.pipelineId
             }
         });
 
-        order = lanes.length;
+        order = lanesLength;
     }
     else {
         order = lane.order;
@@ -814,7 +825,8 @@ export const searchContacts = async (searchTerms : string) => {
             name: {
                 contains : searchTerms
             }
-        }
+        },
+        take: 10 // ⚡ Bolt Optimization: Limit autocomplete search results to prevent massive payloads on broad queries
     })
 
     return res;
@@ -824,13 +836,14 @@ export const upsertTicket = async (ticket: Prisma.TicketUncheckedCreateInput, ta
     
     let order: number = 0;
     if (!ticket.order) {
-        const tickets = await db.ticket.findMany({
+        // Optimize: use count instead of fetching all records to memory
+        const ticketsLength = await db.ticket.count({
             where: {
                 laneId: ticket.laneId
             },
             
         })
-        order = tickets.length
+        order = ticketsLength
     }
     else {
         order = ticket.order
@@ -963,7 +976,20 @@ export const getFunnels = async (subAccountId: string) => {
             subAccountId: subAccountId
         },
         include: {
-            FunnelPages : true,
+            // ⚡ Bolt Optimization: Use a nested select to only fetch the required fields for FunnelPages, avoiding loading heavy content text into memory
+            FunnelPages: {
+                select: {
+                    id: true,
+                    name: true,
+                    pathName: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    visits: true,
+                    order: true,
+                    previewImage: true,
+                    funnelId: true,
+                }
+            }
         }
     })
 
@@ -976,7 +1002,19 @@ export const getFunnel = async (funnelId: string) => {
             id : funnelId
         },
         include: {
+            // ⚡ Bolt Optimization: Use a nested select to only fetch the required fields for FunnelPages, avoiding loading heavy content text into memory
             FunnelPages: {
+                select: {
+                    id: true,
+                    name: true,
+                    pathName: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    visits: true,
+                    order: true,
+                    previewImage: true,
+                    funnelId: true,
+                },
                 orderBy: {
                     order : 'asc'
                 }
