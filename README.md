@@ -47,7 +47,7 @@ Before you begin, ensure you have met the following requirements:
 
 ### Visit the app
 
-[Webcraft-Pro](https://webcraft-pro.vercel.app/)
+Visit the app at - [Webcraft-Pro](https://webcraft-pro.vercel.app/)
 
 ### Installation
 
