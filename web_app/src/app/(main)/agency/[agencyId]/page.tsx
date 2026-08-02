@@ -46,7 +46,8 @@ const Page = async ({
 
   if (!agencyDetails) return;
 
-  const subaccounts = await db.subAccount.findMany({
+  // ⚡ Bolt Optimization: Use count() instead of findMany().length to avoid fetching all records into memory
+  const subaccountsCount = await db.subAccount.count({
     where: {
       agencyId: params.agencyId,
     },
@@ -96,7 +97,7 @@ const Page = async ({
           <Card className="flex-1 relative">
             <CardHeader>
               <CardDescription>Active Clients</CardDescription>
-              <CardTitle className="text-4xl">{subaccounts.length}</CardTitle>
+              <CardTitle className="text-4xl">{subaccountsCount}</CardTitle>
             </CardHeader>
             <CardContent className="text-sm text-muted-foreground">
               Reflects the number of sub accounts you own and manage.
@@ -117,14 +118,14 @@ const Page = async ({
               <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground text-sm">
-                    Current: {subaccounts.length}
+                    Current: {subaccountsCount}
                   </span>
                   <span className="text-muted-foreground text-sm">
                     Goal: {agencyDetails.goal}
                   </span>
                 </div>
                 <Progress
-                  value={(subaccounts.length / agencyDetails.goal) * 100}
+                  value={(subaccountsCount / agencyDetails.goal) * 100}
                 />
               </div>
             </CardFooter>

@@ -6,7 +6,7 @@ import {
 } from "@/lib/types";
 import { useModal } from "@/providers/model-provider";
 import { SubAccount, User } from "@prisma/client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useToast } from "../ui/use-toast";
 import { useRouter } from "next/navigation";
 import {
@@ -213,6 +213,16 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
     }
   };
 
+  const permissionsMap = useMemo(() => {
+    const map = new Map();
+    if (subAccountPermissions?.Permissions) {
+      for (const p of subAccountPermissions.Permissions) {
+        map.set(p.subAccountId, p);
+      }
+    }
+    return map;
+  }, [subAccountPermissions]);
+
   return (
     <>
       <Card className="w-full">
@@ -349,10 +359,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
                     </FormDescription>
                     <div className="flex flex-col gap-4">
                       {subAccounts?.map((subAccount) => {
-                        const subAccountPermissionsDetails =
-                          subAccountPermissions?.Permissions.find(
-                            (p) => p.subAccountId === subAccount.id
-                          );
+                        const subAccountPermissionsDetails = permissionsMap.get(subAccount.id);
                         return (
                           <div
                             key={subAccount.id}
